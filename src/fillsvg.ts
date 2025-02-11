@@ -988,7 +988,7 @@ class FillSVG extends ComputingFunctions {
                 )
                 //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")
                 .style("fill", object.color)
-                .style("fill-opacity", "0.8")
+                .style("fill-opacity", "0") //Original Value: 0.8
                 .style("stroke", object.color[i] || "#000")
                 .style("z-index", "3")
                 .style("stroke-width", "2px")
