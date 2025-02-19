@@ -58,13 +58,15 @@ class PreComputing {
             if (object.data[i][0].y !== 0) {
                 object.data[i].unshift({
                     x: object.data[i][0].x - 1,
-                    y: 0
+                    // Temp Solution; Line still extends too far
+                    // TODO: Fix
+                    y: object.data[i][0].y
                 })
             }
             if (object.data[i][object.data[i].length - 1].y !== 0) {
                 object.data[i].push({
                     x: object.data[i][object.data[i].length - 1].x + 1,
-                    y: 0
+                    y: object.data[i][0].y
                 })
             }
             let maxValue = Math.max.apply(Math, object.data[i].map((o) => {
