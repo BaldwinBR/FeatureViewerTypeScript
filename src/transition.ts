@@ -203,7 +203,17 @@ export class Transition extends ComputingFunctions {
 
     public lineTransition(object) {
         let container = this.commons.svgContainer.select(`#c${object.id}_container`);
-        const yScores = object.data.map(o => o.y);
+        
+        let data;
+
+        // flatten data into one array and get max/min scores from that
+        if (Array.isArray(object.data[0])){
+            data = object.data.flat(2)
+        } else {
+            data =  object.data
+        }
+        
+        const yScores = data.map(o => o.y);
         const maxScore = Math.max(...yScores);
         const minScore = Math.min(...yScores);
         // keep height

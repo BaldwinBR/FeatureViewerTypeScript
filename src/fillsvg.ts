@@ -945,35 +945,14 @@ class FillSVG extends ComputingFunctions {
 
     public fillSVGLine(object, position = 0) {
         // if (!object.interpolation) object.interpolation = "curveBasis"; // TODO: not sensitive to interpolation now
-        if (object.fill === undefined) object.fill = true;
+        
+        if (object.fill === undefined) object.fill = false; //Curves being used as lines; no need to fill
         let histoG = this.commons.svgContainer.append("g")
             // necessary id to get height when placing tags
             .attr("id", () => {return 'c' + object.id + '_container'})
             .attr("class", "lining featureLine")
             .attr("transform", "translate(0," + position + ")")
             .attr("heigth", object.curveHeight);
-
-        let dataLine = [];
-        dataLine.push([{
-            x: 1,
-            y: 0
-        }, {
-            x: this.commons.fvLength,
-            y: 0
-        }]);
-
-        /*histoG.selectAll(".line " + object.className)
-            .data(dataLine)
-            .enter()
-            .append("path")
-            .attr("clip-path", "url(#clip)")
-            .attr("d", this.commons.lineBond)
-            .attr("class", "line " + object.className)
-            .style("z-index", "0")
-            .style("stroke", "black")
-            .style("stroke-width", "1px");*/
-        // interpolate
-        //this.commons.lineGen().curve(object.interpolation)
 
         object.data.forEach((dd, i) => {
 
@@ -989,8 +968,9 @@ class FillSVG extends ComputingFunctions {
                     })
                 )
                 //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")
-                .style("fill", object.color)
-                .style("fill-opacity", "0") //Original Value: 0.8
+                //.style("fill", object.color)
+                .style("fill", object.fill ? object.color : "none") // Prevents curve from being filled
+                .style("fill-opacity", "0.8") 
                 .style("stroke", object.color[i] || "#000")
                 .style("z-index", "3")
                 .style("stroke-width", "2px")
