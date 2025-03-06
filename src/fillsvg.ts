@@ -60,13 +60,15 @@ class PreComputing {
                     x: object.data[i][0].x - 1,
                     // Temp Solution; Line still extends too far
                     // TODO: Fix
-                    y: object.data[i][0].y
+                    y: object.data[i][0].y,
+                    color: object.data[i][0].color //extends color of first segment
                 })
             }
             if (object.data[i][object.data[i].length - 1].y !== 0) {
                 object.data[i].push({
                     x: object.data[i][object.data[i].length - 1].x + 1,
-                    y: object.data[i][0].y
+                    y: object.data[i][0].y,
+                    color: object.data[i][0].color
                 })
             }
             let maxValue = Math.max.apply(Math, object.data[i].map((o) => {
@@ -91,7 +93,8 @@ class PreComputing {
                     y: yValue,
                     id: d.id,
                     description: d.label || '',
-                    tooltip: d.tooltip || ''
+                    tooltip: d.tooltip || '',
+                    color: d.color || '' //preserve color value of segment
                 }
             })
             ]
@@ -298,6 +301,8 @@ class FillSVG extends ComputingFunctions {
                     return l.y < 0
                 }).length) negativeNumbers = true;
             });
+
+
             this.preComputing.preComputingLine(feature);
 
             this.fillSVGLine(feature, this.commons.YPosition);
@@ -944,6 +949,7 @@ class FillSVG extends ComputingFunctions {
     }
 
     public fillSVGLine(object, position = 0) {
+
         // if (!object.interpolation) object.interpolation = "curveBasis"; // TODO: not sensitive to interpolation now
         
         if (object.fill === undefined) object.fill = false; //Curves being used as lines; no need to fill
@@ -954,27 +960,112 @@ class FillSVG extends ComputingFunctions {
             .attr("transform", "translate(0," + position + ")")
             .attr("heigth", object.curveHeight);
 
+        // Line graphs are made up of segments, 
+        // constructed from points of the same color,
+        // that appear in succession
         object.data.forEach((dd, i) => {
 
-            histoG.selectAll("." + object.className + i)
-                .data(dd)
-                .enter()
-                .append("path")
-                //.attr("clip-path", "url(#clip)") // firefox compatibility
-                .attr("class", "element " + object.className + " " + object.className + i)
-                // d3 v4
-                .attr("d", this.commons.lineGen.y((d) => {
-                        return this.commons.lineYScale(-d.y) * 10 + object.shift;
+            interface Point {
+                x: number;
+                y: number;
+                description: string;
+                tooltip: string;
+            }
+
+            interface Segment {
+                color: string;
+                points: Array<Point>;
+            }
+
+            let line = dd[0];
+            let segments: Array<Segment> = [];
+            // Define currentSegment with data from first point in array
+            let currentSegment: Segment  = {
+                color: line[0].color,
+                points: [{
+                    x: line[0].x,
+                    y: line[0].y,
+                    description: line[0].description,
+                    tooltip: line[0].tooltip,
+                }]
+            };
+            
+            for (let i  = 1; i < line.length; i++){
+                let point = line[i];
+
+                // Color of current point matches the currentSegment's line color,
+                // keep growing the segment
+                if (point.color == currentSegment.color){
+                    currentSegment.points.push({
+                        x: point.x,
+                        y: point.y,
+                        description: point.description,
+                        tooltip: point.tooltip,
                     })
-                )
-                //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")
-                //.style("fill", object.color)
-                .style("fill", object.fill ? object.color : "none") // Prevents curve from being filled
-                .style("fill-opacity", "0.8") 
-                .style("stroke", object.color[i] || "#000")
-                .style("z-index", "3")
-                .style("stroke-width", "2px")
-                .call(this.commons.d3helper.tooltip(object));
+                } else {
+                    // New color encountered, add currentSegment and start a new
+                    // segment with the new color
+                    segments.push(currentSegment)
+                    currentSegment = {
+                        color: point.color,
+                        points: [{
+                            x: point.x,
+                            y: point.y,
+                            description: point.description,
+                            tooltip: point.tooltip,
+                        }]
+                    };
+                }
+            }
+
+            // Push last segment
+            segments.push(currentSegment)
+
+            // Construct SVG path objects for each new segment
+            // To form continuous line, midpoint between segments generated
+            segments.forEach((seg, index) => {
+
+                if (index < segments.length - 1) {
+                    const currLast = seg.points.slice(-1)[0];
+                    const nextFirst = segments[index + 1].points[0];
+            
+                    // Create midpoint between curr seg and next
+                    const midPoint = {
+                        ...currLast,  // Preserve desciption & tooltip properties
+                        x: (currLast.x + nextFirst.x) / 2,
+                        y: (currLast.y + nextFirst.y) / 2
+                    };
+            
+                    // Update this segment's end to midpoint between 
+                    // its current end and the next segment's start
+                    seg.points.push(midPoint);
+            
+                    // Update next segment's start to midpoint between 
+                    // its current start and the curr segment's end
+                    segments[index + 1].points.unshift(midPoint);
+                }
+                
+                histoG.selectAll(null) //"." + object.className + i
+                    .data([seg.points])
+                    .enter()
+                    .append("path")
+                    //.attr("clip-path", "url(#clip)") // firefox compatibility
+                    .attr("class", "element " + object.className + " " + object.className + i + " seg" + index)
+                    // d3 v4
+                    .attr("d", this.commons.lineGen.y((d) => {
+                            return this.commons.lineYScale(-d.y) * 10 + object.shift;
+                        })
+                    )
+                    //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")
+                    //.style("fill", object.color)
+                    .style("fill", object.fill ? object.color : "none") // Prevents curve from being filled
+                    .style("fill-opacity", "0.8") 
+                    .style("stroke", seg.color || object.color[i])
+                    .style("z-index", "3")
+                    .style("stroke-width", "2px")
+                    .call(this.commons.d3helper.tooltip(object));
+
+                })
 
         });
 
