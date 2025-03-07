@@ -1060,7 +1060,9 @@ class FillSVG extends ComputingFunctions {
                     //.style("fill", object.color)
                     .style("fill", object.fill ? object.color : "none") // Prevents curve from being filled
                     .style("fill-opacity", "0.8") 
-                    .style("stroke", seg.color || object.color[i])
+                    // TODO: black stroke is a hot-fix for multi-line features coloring, 
+                    // Should go and change original instantiation code instead
+                    .style("stroke", seg.color || object.color[i] || 'black')
                     .style("z-index", "3")
                     .style("stroke-width", "2px")
                     .call(this.commons.d3helper.tooltip(object));
