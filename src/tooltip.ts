@@ -49,7 +49,8 @@ class Tool extends Calculate {
 
     private updateLineTooltip(mouse, pD, scalingFunction, labelTrackWidth) {
         let xP = mouse - labelTrackWidth;
-        let elemHover = "";
+        let elemHover = null;
+        
         for (let l = 1; l < pD.length; l++) {
             let scalingFirst = scalingFunction(pD[l - 1].x);
             let scalingSecond = scalingFunction(pD[l].x);
@@ -61,6 +62,7 @@ class Tool extends Calculate {
         }
         return elemHover;
     };
+    
 
     private clickTagFunction(d) {
         // trigger tag_selected event: buttons clicked
@@ -80,7 +82,7 @@ class Tool extends Calculate {
         let getMessage = (thing, type='default') => {
 
             // first line
-            let tooltip_message = '';
+            let tooltip_message = 'hello';
 
             // case of flags
             if (thing.hasOwnProperty('title')) {
@@ -258,7 +260,6 @@ class Tool extends Calculate {
             };
 
             return tooltip;
-
         };
 
         this.commons.d3helper.tooltip = (object) => {
@@ -293,30 +294,167 @@ class Tool extends Calculate {
                     return positions
                 };
 
-                let getMyMessage = (pD) => {
-                    let tooltip_message = '';
-                    if (object.type === "path") {
-                        let reformat = {
-                            x: pD[0].x,
-                            y: pD[1].x
+                let getMyMessage = (pD, object, absoluteMousePos) => {
+                    // code for custom tool tips that doesn't work
+                   /* if (object.customTooltip) {
+                        try {
+                            // For curves, we need to find the specific point being hovered
+                            if (object.type === "curve") {
+                                let elemHover = this.updateLineTooltip(
+                                    absoluteMousePos[0],
+                                    pD,
+                                    this.commons.scaling,
+                                    this.commons.viewerOptions.labelTrackWidth
+                                );
+                                
+                                if (elemHover) {
+                                    return object.customTooltip(elemHover);
+                                }
+                            } else {
+                                // For other types, pass the data point directly
+                                return object.customTooltip(pD);
+                            }
+                        } catch (error) {
+                            console.error("Error in custom tooltip function:", error);
+                            // Fall back to default tooltip if custom tooltip fails
                         }
-                        tooltip_message = getMessage(reformat);
+                    } */
+
+                    // Check if it's a curve
+                    if (object.type === "curve") {
+                        // Find which data point is hovered
+                        let elemHover = this.updateLineTooltip(
+                            absoluteMousePos[0],
+                            pD, // the entire array of points
+                            this.commons.scaling,
+                            this.commons.viewerOptions.labelTrackWidth,
+                        );
+
+                        let sequence = this.commons.stringSequence[elemHover.x];
+                        
+                        // If the feature has a customTooltip, call it with the hovered data point
+                         if (object.customTooltip && elemHover) {
+                             return object.customTooltip(elemHover);
+                         }
+                        
+                        if (elemHover) {
+                            // secondary structure
+                            if (object.flag == 1) {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                                <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                <p style="margin:2px;">Position: ${elemHover.x}${sequence}</p>
+                                <p style="margin:2px;">Type: ${object.label}</p>
+                            `;
+                            }
+                            // Default formatting for curves
+                            return `
+                                <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                                <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                <p style="margin:2px;">Position: ${elemHover.x}${sequence}</p>
+                            `;
+                        }
+                    } else if (object.type === "rect") {
+                        // Handle rectangles (regions)
+                        // Check for custom tooltip function first
+                        /*
+                        if (object.customTooltip) {
+                            return object.customTooltip(pD);
+                        } */
+                        let startPos = pD.x;
+                        let endPos = pD.y;
+                            
+                        // Get the exact position where mouse is hovering
+                        let mouseX = absoluteMousePos[0] - this.commons.viewerOptions.labelTrackWidth;
+                        let startPixel = this.commons.scaling(startPos);
+                        let endPixel = this.commons.scaling(endPos);
+                            
+                        // Calculate the position
+                        let fraction = (mouseX - startPixel) / (endPixel - startPixel);
+                        fraction = Math.max(0, Math.min(1, fraction)); // Clamp between 0 and 1
+                            
+                        // Get exact position
+                        let exactPos = Math.round(startPos + fraction * (endPos - startPos));
+                            
+                        // Get the sequence at exact position
+                        let sequence = this.commons.stringSequence[exactPos];
+
+                        // secondary structure
+                        if (object.flag == 2) {
+                            return `
+                            <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                            <p style="margin:2px;">Region: ${pD.x} - ${pD.y}</p>
+                            <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            <p style="margin:2px;">Type: ${object.label}</p>
+                        `;
+                        }
+                        // ptm sites
+                        if (object.flag == 3) {
+                            return `
+                            <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                            <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                        `;
+                        }
+                        // conservation level
+                        if (object.flag == 4) {
+                            return `
+                            <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                            <p style="margin:2px;">Level ${object.label}</p>
+                            <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                        `;
+                        }
+
+                        // Default formatting for rectangles
+                        return `
+                            <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                            <p style="margin:2px;">Region: ${pD.x} - ${pD.y}</p>
+                            <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                        `;
+                    } else if (object.type === "path") {
+                        let reformat = { x: pD[0].x, y: pD[1].x };
+                        // Check for custom tooltip function first
+                        if (object.customTooltip) {
+                            return object.customTooltip(reformat);
+                        }
+                        
+                        return `
+                            <p style="margin:2px;font-weight:700;">${object.label || "Path"}</p>
+                            <p style="margin:2px;">Start: ${reformat.x}</p>
+                            <p style="margin:2px;">End: ${reformat.y}</p>
+                        `;
+                    } else if (object.type === "circle") {
+                        // Check for custom tooltip function first
+                        if (object.customTooltip) {
+                            return object.customTooltip(pD);
+                        }
+                        
+                        return `
+                            <p style="margin:2px;font-weight:700;">${object.label || "Point"}</p>
+                            <p style="margin:2px;">Position: ${pD.x}}</p>
+                            <p style="margin:2px;">Value: ${pD.y !== undefined ? pD.y : ''}</p>
+                        `;
+                    } else if (object.type === "button") {
+                        // Check for custom tooltip function first
+                        if (object.customTooltip) {
+                            return object.customTooltip(object);
+                        }
+                        
+                        return `
+                            <p style="margin:2px;font-weight:700;">${object.title || "Button"}</p>
+                        `;
                     }
-                    else if (object.type === "curve") {
-                        let elemHover = updateLineTooltipFunction(absoluteMousePos[0], pD, scalingFunction, labelTrackWidth);
-                        tooltip_message = getMessage(elemHover, 'curve');
+                    
+                    // Fallback for any other type
+                    if (object.customTooltip) {
+                        return object.customTooltip(pD);
                     }
-                    else if (object.type === "circle") {
-                        tooltip_message = getMessage(pD, 'circle');
-                    }
-                    else if (object.type === "button") {
-                        tooltip_message = getMessage(object);
-                    } else {
-                        // e.g. rect
-                        tooltip_message = getMessage(pD);
-                    }
-                    return tooltip_message
-                };
+                    
+                    return `
+                        <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                        <p style="margin:2px;">Value: ${pD.x !== undefined ? pD.x : ''}</p>
+                    `;
+                }
+                  
 
                 let drawMyTooltip = (pD) => {
                     if (pD.tooltip || object.tooltip) {
@@ -327,7 +465,7 @@ class Tool extends Calculate {
                     } else {
                         absoluteMousePos = d3.mouse(bodyNode);
                         let positions = getPositions(absoluteMousePos);
-                        let tooltip_message = getMyMessage(pD);
+                        let tooltip_message = getMyMessage(pD, object, absoluteMousePos);
 
                         tooltipDiv.transition()
                             .duration(200)
