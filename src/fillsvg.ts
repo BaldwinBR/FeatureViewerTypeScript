@@ -55,6 +55,9 @@ class PreComputing {
             object.data[i].sort((a, b) => {
                 return a.x - b.x;
             });
+            // Helper code to make curves look better
+            // Curves are now line graphs and no longer need this extension
+            /*
             if (object.data[i][0].y !== 0) {
                 object.data[i].unshift({
                     x: object.data[i][0].x - 1,
@@ -71,6 +74,7 @@ class PreComputing {
                     color: object.data[i][0].color
                 })
             }
+            */
             let maxValue = Math.max.apply(Math, object.data[i].map((o) => {
                 //return Math.abs(o.y);
                 //return Math.round(Math.abs(o.y))+1;
