@@ -82,7 +82,7 @@ class Tool extends Calculate {
         let getMessage = (thing, type='default') => {
 
             // first line
-            let tooltip_message = 'hello';
+            let tooltip_message = '';
 
             // case of flags
             if (thing.hasOwnProperty('title')) {
@@ -295,31 +295,6 @@ class Tool extends Calculate {
                 };
 
                 let getMyMessage = (pD, object, absoluteMousePos) => {
-                    // code for custom tool tips that doesn't work
-                   /* if (object.customTooltip) {
-                        try {
-                            // For curves, we need to find the specific point being hovered
-                            if (object.type === "curve") {
-                                let elemHover = this.updateLineTooltip(
-                                    absoluteMousePos[0],
-                                    pD,
-                                    this.commons.scaling,
-                                    this.commons.viewerOptions.labelTrackWidth
-                                );
-                                
-                                if (elemHover) {
-                                    return object.customTooltip(elemHover);
-                                }
-                            } else {
-                                // For other types, pass the data point directly
-                                return object.customTooltip(pD);
-                            }
-                        } catch (error) {
-                            console.error("Error in custom tooltip function:", error);
-                            // Fall back to default tooltip if custom tooltip fails
-                        }
-                    } */
-
                     // Check if it's a curve
                     if (object.type === "curve") {
                         // Find which data point is hovered
@@ -330,7 +305,7 @@ class Tool extends Calculate {
                             this.commons.viewerOptions.labelTrackWidth,
                         );
 
-                        let sequence = this.commons.stringSequence[elemHover.x];
+                        let sequence = this.commons.stringSequence;
                         
                         // If the feature has a customTooltip, call it with the hovered data point
                          if (object.customTooltip && elemHover) {
@@ -343,7 +318,7 @@ class Tool extends Calculate {
                                 return `
                                 <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
                                 <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
-                                <p style="margin:2px;">Position: ${elemHover.x}${sequence}</p>
+                                <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
                                 <p style="margin:2px;">Type: ${object.label}</p>
                             `;
                             }
@@ -351,16 +326,11 @@ class Tool extends Calculate {
                             return `
                                 <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
                                 <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
-                                <p style="margin:2px;">Position: ${elemHover.x}${sequence}</p>
+                                <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
                             `;
                         }
                     } else if (object.type === "rect") {
                         // Handle rectangles (regions)
-                        // Check for custom tooltip function first
-                        /*
-                        if (object.customTooltip) {
-                            return object.customTooltip(pD);
-                        } */
                         let startPos = pD.x;
                         let endPos = pD.y;
                             
@@ -412,10 +382,6 @@ class Tool extends Calculate {
                         `;
                     } else if (object.type === "path") {
                         let reformat = { x: pD[0].x, y: pD[1].x };
-                        // Check for custom tooltip function first
-                        if (object.customTooltip) {
-                            return object.customTooltip(reformat);
-                        }
                         
                         return `
                             <p style="margin:2px;font-weight:700;">${object.label || "Path"}</p>
@@ -423,36 +389,19 @@ class Tool extends Calculate {
                             <p style="margin:2px;">End: ${reformat.y}</p>
                         `;
                     } else if (object.type === "circle") {
-                        // Check for custom tooltip function first
-                        if (object.customTooltip) {
-                            return object.customTooltip(pD);
-                        }
-                        
                         return `
                             <p style="margin:2px;font-weight:700;">${object.label || "Point"}</p>
                             <p style="margin:2px;">Position: ${pD.x}}</p>
                             <p style="margin:2px;">Value: ${pD.y !== undefined ? pD.y : ''}</p>
                         `;
                     } else if (object.type === "button") {
-                        // Check for custom tooltip function first
-                        if (object.customTooltip) {
-                            return object.customTooltip(object);
-                        }
-                        
                         return `
                             <p style="margin:2px;font-weight:700;">${object.title || "Button"}</p>
                         `;
                     }
                     
                     // Fallback for any other type
-                    if (object.customTooltip) {
-                        return object.customTooltip(pD);
-                    }
-                    
-                    return `
-                        <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
-                        <p style="margin:2px;">Value: ${pD.x !== undefined ? pD.x : ''}</p>
-                    `;
+                    return null;
                 }
                   
 
