@@ -47,6 +47,7 @@ class Tool extends Calculate {
 
     }
 
+    /*
     private updateLineTooltip(mouse, pD, scalingFunction, labelTrackWidth) {
         let xP = mouse - labelTrackWidth;
         let elemHover = null;
@@ -60,6 +61,42 @@ class Tool extends Calculate {
                 break;
             }
         }
+        return elemHover;
+    };
+    */
+
+     private updateLineTooltip(mouse, pD, scalingFunction, labelTrackWidth) {
+        let xP = mouse - labelTrackWidth;
+        let elemHover = null;
+
+        // Explicitly check the first point
+        // Line Segment starting positions do not display tootlip correctly without this check
+        let scalingFirst = scalingFunction(pD[0].x);
+        if (xP <= scalingFirst) {
+            return pD[0];
+        }
+
+        // Loop through the remaining points to find the hovered element
+        for (let l = 1; l < pD.length; l++) {
+            let scalingPrev = scalingFunction(pD[l - 1].x);
+            let scalingCurr = scalingFunction(pD[l].x);
+
+            // Calculate the midpoint between the previous and current points
+            let halfway = (scalingCurr - scalingPrev) / 2;
+
+            // Check if the mouse is closer to the previous point
+            if (xP >= scalingPrev && xP < scalingPrev + halfway) {
+                elemHover = pD[l - 1];
+                break;
+            }
+
+            // Check if the mouse is closer to the current point
+            if (xP >= scalingPrev + halfway && xP <= scalingCurr) {
+                elemHover = pD[l];
+                break;
+            }
+        }
+
         return elemHover;
     };
     
@@ -313,21 +350,30 @@ class Tool extends Calculate {
                          }
                         
                         if (elemHover) {
-                            // secondary structure
-                            if (object.flag == 1) {
+                            // Line segments are connected with fake midpoints for fluid visuals
+                            // Those fake midpoints can have x values of 0.5
+                            // Which should not be displayed by the tooltip
+                            // Checking if the sequence number is valid is a check for this
+                            if(sequence[elemHover.x] != undefined){
+                                // secondary structure
+                                if (object.flag == 1) {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                    <p style="margin:2px;">Type: ${object.label}</p>
+                                `;
+                                }
+                                // Default formatting for curves
                                 return `
-                                <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
-                                <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
-                                <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
-                                <p style="margin:2px;">Type: ${object.label}</p>
-                            `;
+                                    <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
                             }
-                            // Default formatting for curves
-                            return `
-                                <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
-                                <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
-                                <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
-                            `;
+                            else{
+                                return null 
+                            } 
                         }
                     } else if (object.type === "rect") {
                         // Handle rectangles (regions)

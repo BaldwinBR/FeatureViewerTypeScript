@@ -979,6 +979,7 @@ class FillSVG extends ComputingFunctions {
 
             let line = dd[0];
             let segments: Array<Segment> = [];
+
             // Define currentSegment with data from first point in array
             let currentSegment: Segment  = {
                 color: line[0].color,
@@ -993,6 +994,28 @@ class FillSVG extends ComputingFunctions {
             for (let i  = 1; i < line.length; i++){
                 let point = line[i];
 
+                // If the current point has x === -1
+                // start a new segment
+                if (point.y === -1) {
+
+                    // Only push the current segment if it's not empty
+                    // Checks if very first value was -1 to ensure
+                    // starting segment of length 1 of value -1 does not get pushed
+                    if (currentSegment.points.length > 0 && i != 1) { //TODO: Ensure this fully fixes functionality
+                        segments.push(currentSegment);
+                    }
+
+                    // Start an empty segment for the -1 values
+                    currentSegment = {
+                        color: point.color,
+                        points: []
+                    };
+
+                    // Immediately start a new segment without pushing the -1 segment
+                    continue;
+                }
+
+
                 // Color of current point matches the currentSegment's line color,
                 // keep growing the segment
                 if (point.color == currentSegment.color){
@@ -1005,7 +1028,9 @@ class FillSVG extends ComputingFunctions {
                 } else {
                     // New color encountered, add currentSegment and start a new
                     // segment with the new color
-                    segments.push(currentSegment)
+                    if (currentSegment.points.length > 0){
+                        segments.push(currentSegment)
+                    }
                     currentSegment = {
                         color: point.color,
                         points: [{
@@ -1019,7 +1044,10 @@ class FillSVG extends ComputingFunctions {
             }
 
             // Push last segment
-            segments.push(currentSegment)
+            if (currentSegment.points.length > 0){
+                segments.push(currentSegment)
+            }
+            console.log(segments)
 
             // Construct SVG path objects for each new segment
             // To form continuous line, midpoint between segments generated
@@ -1028,21 +1056,57 @@ class FillSVG extends ComputingFunctions {
                 if (index < segments.length - 1) {
                     const currLast = seg.points.slice(-1)[0];
                     const nextFirst = segments[index + 1].points[0];
-            
-                    // Create midpoint between curr seg and next
-                    const midPoint = {
-                        ...currLast,  // Preserve desciption & tooltip properties
-                        x: (currLast.x + nextFirst.x) / 2,
-                        y: (currLast.y + nextFirst.y) / 2
-                    };
-            
-                    // Update this segment's end to midpoint between 
-                    // its current end and the next segment's start
-                    seg.points.push(midPoint);
-            
-                    // Update next segment's start to midpoint between 
-                    // its current start and the curr segment's end
-                    segments[index + 1].points.unshift(midPoint);
+
+                    const currLastx = seg.points.slice(-1)[0].x;
+                    const nextFirstx = segments[index + 1].points[0].x;
+
+                    const shouldbenext = seg.points.slice(-1)[0].x + 1
+
+                    //console.log("lastX"  + currLastx);
+                    //console.log("nextX" + nextFirstx);
+                    //console.log("lastX+1 " + shouldbenext);
+                    //console.log('\n');
+
+                    // Special case: segment length is 1
+                    // SVG path objects cannot be length of 1
+                    // 0.5 will be hidden by tooltip
+                    if (seg.points.length === 1) {
+                        // Create two midpoints: one behind, one ahead
+                        const midPointBehind = {
+                            ...currLast,
+                            x: currLastx - 0.5,
+                            y: currLast.y 
+                        };
+                        const midPointAhead = {
+                            ...currLast,
+                            x: currLastx + 0.5,
+                            y: currLast.y 
+                        };
+
+                        // Add midpoints to the current segment
+                        seg.points.unshift(midPointBehind);
+                        seg.points.push(midPointAhead);
+                    }
+                    
+                    
+                    if (nextFirstx == shouldbenext){
+
+                        // Create midpoint between curr seg and next
+                        const midPoint = {
+                            ...currLast,  // Preserve desciption & tooltip properties
+                            x: (currLast.x + nextFirst.x) / 2,
+                            y: (currLast.y + nextFirst.y) / 2
+                        };
+                
+                        // Update this segment's end to midpoint between 
+                        // its current end and the next segment's start
+                        seg.points.push(midPoint);
+                
+                        // Update next segment's start to midpoint between 
+                        // its current start and the curr segment's end
+                        segments[index + 1].points.unshift(midPoint);
+                    }
+                        
                 }
                 
                 histoG.selectAll(null) //"." + object.className + i
