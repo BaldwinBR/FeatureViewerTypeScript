@@ -20,7 +20,7 @@ export interface UserOptions {
   animation?: boolean,
   unit?: string,
   backgroundcolor?: string,
-  maxDepth?: number
+  maxDepth?: number;
 }
 
 export interface ViewerOptions {
@@ -68,7 +68,7 @@ export interface ViewerOptions {
   ladderWidth: number,
   ladderHeight: number,
   ladderSpacing: number,
-  labelSidebarWidth?: number
+  labelSidebarWidth?: number;
 }
 
 export interface FeaturesList extends Array<FeatureObject>{}
@@ -89,7 +89,9 @@ export interface FeatureObject {
   sidebar?: Array<SideBarObject>,
   isOpen?: boolean,
   flagLevel?: number,
-  subfeatures?: Array<FeatureObject>
+  subfeatures?: Array<FeatureObject>,
+  customTooltip?: (data: any) => string,
+  flag?: number;
 }
 
 export interface FeatureData {
@@ -100,7 +102,8 @@ export interface FeatureData {
   color?: string,
   stroke?: string,
   opacity?: number,
-  tooltip?: string
+  tooltip?: string,
+  flag?: number;
 }
 
 export interface SideBarObject {
@@ -109,7 +112,8 @@ export interface SideBarObject {
   content?: string,
   type?: string,
   width?: number,
-  label?: string | number
+  label?: string | number,
+  flag?: number;
 }
 
 export interface FeatureViewerLogger {
