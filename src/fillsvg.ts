@@ -105,11 +105,12 @@ class PreComputing {
         }
 
         // this.commons.lineYScale.range([0, -(shift)]).domain([0, -(level)]);
-        this.commons.lineYScale.domain([minScore, maxScore]).range([0, this.commons.step/11]);
+        this.commons.lineYScale.domain([0, 1]).range([0, this.commons.step/11]);
 
         object.pathLevel = shift * 10 + 5;
         object.level = level;
-        object.shift = shift * 10 + 5;
+        //object.shift = shift * 10 + 5;
+        object.shift = shift * 5; // changes line box start pos
 
     };
 
@@ -463,7 +464,7 @@ class FillSVG extends ComputingFunctions {
                 return this.commons.scaling.range([2, this.commons.viewerOptions.width - 2])(i + start)
             })
             .attr("y", this.commons.step)
-            .attr("font-size", "12px")
+            .attr("font-size", "14px")
             .attr("font-family", "monospace")
             .text((d) => {
                 return d
@@ -1121,7 +1122,8 @@ class FillSVG extends ComputingFunctions {
                     .attr("class", "element " + object.className + " " + object.className + i + " seg" + index)
                     // d3 v4
                     .attr("d", this.commons.lineGen.y((d) => {
-                            return this.commons.lineYScale(-d.y) * 10 + object.shift;
+                            //return this.commons.lineYScale(-d.y) * 10 + object.shift;
+                            return this.commons.lineYScale(-d.y) * 22 + object.shift;
                         })
                     )
                     //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")

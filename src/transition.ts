@@ -217,10 +217,13 @@ export class Transition extends ComputingFunctions {
         const maxScore = Math.max(...yScores);
         const minScore = Math.min(...yScores);
         // keep height
-        this.commons.lineYScale.domain([minScore, maxScore]).range([0, this.commons.step/11]);
+        this.commons.lineYScale.domain([0, 1]).range([0, this.commons.step/11]);
         container.selectAll(".line " + object.className)
             .attr("d", (d) => {
-                return this.commons.lineYScale(-d.y) * 10 + object.shift
+                //return this.commons.lineYScale(-d.y) * 10 + object.shift
+                // Changes line scale differential
+                // aka how much space it takes up
+                return this.commons.lineYScale(-d.y) * 22 + object.shift
             });
 
         // transit line
@@ -236,7 +239,8 @@ export class Transition extends ComputingFunctions {
 
         transit
             .attr("d", this.commons.lineGen.y((d) => {
-                    return this.commons.lineYScale(-d.y) * 10 + object.shift;
+                    //return this.commons.lineYScale(-d.y) * 10 + object.shift
+                    return this.commons.lineYScale(-d.y) * 22 + object.shift;
                 })
             );
     }
