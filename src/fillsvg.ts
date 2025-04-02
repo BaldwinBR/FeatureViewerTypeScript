@@ -325,6 +325,9 @@ class FillSVG extends ComputingFunctions {
 
     public tagArea(object, thisYPosition) {
 
+        // Allows for sidbar to start at sequence level instead of next to first feature
+        let tagAreaYOffset = -this.commons.step - 5;
+
         // var threeArray = [showDisorderContentTag, showViewerTag, showLinkTag];
 
         // adjust height not triangle
@@ -334,11 +337,12 @@ class FillSVG extends ComputingFunctions {
         let featureArea = this.commons.tagsContainer.append("g")
             .attr("class", "tagGroup")
             .attr("id", id)
-            .attr("transform", "translate(0," + thisYPosition + ")");
+            .attr("transform", "translate(0," + (thisYPosition + tagAreaYOffset) + ")");
 
         // ad areas in any case
         if (object.sidebar) {
 
+            let multiButtonSpacing = 0;
             let objectPos = 0;
             // check type and add html elements accordingly
             for (const bt of object.sidebar) {
@@ -404,7 +408,7 @@ class FillSVG extends ComputingFunctions {
                     let gHtml = featureArea
                         .append('g')
                         .attr("id", id + '_button_' + bt.id)
-                        .attr("transform", "translate(" + (objectPos + 3) + ",0)")
+                        .attr("transform", "translate(" + (objectPos + 3) + ","+ multiButtonSpacing +")")
                         .data([{
                             label: object.label,
                             featureId: object.id,
@@ -427,6 +431,7 @@ class FillSVG extends ComputingFunctions {
 
                     // objectPos += 50;
                     // get width of the drawn object
+                    /*
                     try {
                         let contentwidth = 0;
                         if (bt.width)
@@ -437,11 +442,15 @@ class FillSVG extends ComputingFunctions {
                     } catch (e) {
                         objectPos += 100;
                     }
+                        */
 
                 } else {
                     this.commons.logger.error("Neither html content nor type of button is specified", {method:'addFeatures',fvId:this.commons.divId,featureId:object.id,buttonId:bt.buttonId})
                 }
+
+                multiButtonSpacing += 20;
             }
+
 
         }
     }
@@ -1052,7 +1061,6 @@ class FillSVG extends ComputingFunctions {
             if (currentSegment.points.length > 0){
                 segments.push(currentSegment)
             }
-            console.log(segments)
 
             // Construct SVG path objects for each new segment
             // To form continuous line, midpoint between segments generated
@@ -1066,11 +1074,6 @@ class FillSVG extends ComputingFunctions {
                     const nextFirstx = segments[index + 1].points[0].x;
 
                     const shouldbenext = seg.points.slice(-1)[0].x + 1
-
-                    //console.log("lastX"  + currLastx);
-                    //console.log("nextX" + nextFirstx);
-                    //console.log("lastX+1 " + shouldbenext);
-                    //console.log('\n');
 
                     // Special case: segment length is 1
                     // SVG path objects cannot be length of 1

@@ -200,7 +200,7 @@ export class Transition extends ComputingFunctions {
                 return -1 * d['y'] * 10 + object.height;
             }));
     }
-
+    
     public lineTransition(object) {
         let container = this.commons.svgContainer.select(`#c${object.id}_container`);
         
@@ -244,6 +244,8 @@ export class Transition extends ComputingFunctions {
                 })
             );
     }
+
+
 
     public text(object, start) {
 

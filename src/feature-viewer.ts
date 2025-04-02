@@ -1310,6 +1310,11 @@ class FeatureViewer {
         this.drawFeatures()
     }
 
+    // Toggle Features Graphs On/Off
+    public featureToggle(){
+        //this.transition.lineTransition(); 
+    }
+
     public downloadSvg() {
 
         let svg_el = document.getElementById('svgContent')
