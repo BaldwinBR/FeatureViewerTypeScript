@@ -320,6 +320,10 @@ class FillSVG extends ComputingFunctions {
             this.lollipop(feature, this.commons.YPosition);
 
         }
+        else if (feature.type === "ptmTriangle") {
+            this.commons.YPosition += 7;
+            this.ptmTriangle(feature, this.commons.YPosition);
+        }
     }
 
     public tagArea(object, thisYPosition) {
@@ -703,129 +707,109 @@ class FillSVG extends ComputingFunctions {
         let circlesPro = this.commons.svgContainer.append("g")
             .attr("class", "pointPosition featureLine")
             .attr("transform", "translate(0," + position + ")")
-            .attr("id", () => {
-                // random string
-                // return divId + '_' + d.title.split(" ").join("_") + '_g'
-                return 'c' + object.id + '_container'
-            });
-
+            .attr("id", () => 'c' + object.id + '_container');
+    
         let dataLine = [];
-        dataLine.push([{
-            x: 1,
-            y: 0
-        }, {
-            x: this.commons.fvLength,
-            y: 0
-        }]);
-
-        // basal line
+        dataLine.push([{ x: 1, y: 0 }, { x: this.commons.fvLength, y: 0 }]);
+    
+        // Basal horizontal line
         circlesPro.selectAll(".line " + object.className)
             .data(dataLine)
             .enter()
             .append("path")
             .attr("d", this.commons.line)
-            .attr("class", () => {
-                return "line " + object.className
-            })
+            .attr("class", () => "line " + object.className)
             .style("z-index", "0")
             .style("stroke", 'gray')
             .style("stroke-width", "0.5px");
-
+    
         let readyData = [...object.data];
-
-        // lollipop base
-        circlesPro.selectAll("." + object.className + 'Lollipop')
-            .data(readyData)
+    
+        // Stack overlapping PTMs vertically by x-position
+        const stackedMap = new Map();
+        readyData.forEach(d => {
+            const key = d.x;
+            if (!stackedMap.has(key)) stackedMap.set(key, []);
+            stackedMap.get(key).push(d);
+        });
+    
+        let stackedData = [];
+        const spacing = this.commons.elementHeight * 0.6; // vertical stack spacing
+    
+        stackedMap.forEach((group, x) => {
+            group.forEach((d, i) => {
+                d._stackY = spacing * i;
+                stackedData.push(d);
+            });
+        });
+    
+        // Draw stems (downward lines from each lollipop)
+        circlesPro.selectAll(".lollipop-stem")
+            .data(stackedData)
             .enter()
             .append("line")
-            .attr("x1", (d) => {return this.commons.scaling(d.x)})
-            .attr("x2", (d) => {return this.commons.scaling(d.x)})
-            .attr("y2", (d) => {
-                let w = this.commons.scaling(d.x + 0.4) - this.commons.scaling(d.x - 0.4);
-                if (this.commons.scaling(d.x + 0.4) - this.commons.scaling(d.x - 0.4) < 2) w = 2;
-                return w + 2;
-            })
-            .attr("y1", -8)
-            .attr("class", "lineElement " + object.className)
-            .style("stroke", (d) => {
-                return d.color || object.color
-            })
-            .style("stroke-width", 1)
-
-        // lollipop head
-        circlesPro.selectAll("." + object.className + 'Lollipop')
-            .data(readyData)
+            .attr("class", "lollipop-stem")
+            .attr("x1", d => this.commons.scaling(d.x))
+            .attr("x2", d => this.commons.scaling(d.x))
+            .attr("y1", d => -d._stackY + 6) // bottom of stem
+            .attr("y2", d => -d._stackY)     // top of stem at circle
+            .style("stroke", d => d.color || object.color)
+            .style("stroke-width", 1);
+    
+        // Draw heads (circles)
+        circlesPro.selectAll(".lollipop-head")
+            .data(stackedData)
             .enter()
             .append("circle")
-            //.attr("clip-path", "url(#clip)")
-            .attr("class", "element " + object.className)
-            .attr("id", (d) => {
-                return "f_" + object.id;
-            })
-            // circle dimensions
-            .attr("cx", (d) => {
-                return this.commons.scaling(d.x)
-            })
-            .attr("cy", "-8") // same as height
-            // circle radius
-            .attr("r", (d) => {
-                if (d.y<=1) {
-                    return d.y*this.commons.elementHeight*0.5
-                } else {
-                    this.commons.logger.warn("Maximum circle radius is 1", {method:'addFeatures',fvId:this.commons.divId,featureId:object.id})
-                    return this.commons.elementHeight*0.5
-                }
-            })
-            .attr("width", (d) => {
-                let w = this.commons.scaling(d.x + 0.4) - this.commons.scaling(d.x - 0.4);
-                if (this.commons.scaling(d.x + 0.4) - this.commons.scaling(d.x - 0.4) < 2) w = 2;
-                return w;
-            })
-            .style("fill", (d) => {
-                return d.color || object.color
-            })
-            .style("fill-opacity", (d) => {
-                if (d.opacity) {
-                    return d.opacity
-                } else if (object.opacity) {
-                    return object.opacity
-                } else {
-                    return "1"
-                }
-            })
-            .style("stroke", (d) => {
-                if ("stroke" in d) {
-                    return d.stroke
-                } else if ("stroke" in object) {
-                    return object.stroke
-                } else {
-                    return d.color
-                }
-            })
+            .attr("class", "lollipop-head element " + object.className)
+            .attr("id", d => "f_" + object.id)
+            .attr("cx", d => this.commons.scaling(d.x))
+            .attr("cy", d => -d._stackY)
+            .attr("r", 3)
+            .style("fill", d => d.color || object.color)
+            .style("fill-opacity", d => d.opacity ?? object.opacity ?? "1")
+            .style("stroke", d => d.stroke ?? object.stroke ?? d.color)
             .call(this.commons.d3helper.tooltip(object));
 
-        this.forcePropagation(circlesPro);
-    }
+        // draw downward-pointing stacked triangle markers with PTM color
+        const triangleSize = 6;
+        const halfWidth = 4;
+        
+        circlesPro.selectAll(".ptm-triangle")
+          .data(stackedData)
+          .enter()
+          .append("polygon")
+          .attr("class", "ptm-triangle")
+          .attr("points", d => {
+            const cx = this.commons.scaling(d.x);     // ✅ zoom-aware
+            const cy = -d._stackY;                    // ✅ stacked position
+        
+            const tip = [cx, cy];                     // ⬇ tip (bottom point)
+            const left = [cx - halfWidth, cy - triangleSize];
+            const right = [cx + halfWidth, cy - triangleSize];
+        
+            return `${tip.join(',')} ${left.join(',')} ${right.join(',')}`;
+          })
+          .style("fill", d => d.color || object.color)
+          .style("stroke", d => d.stroke ?? d.color)
+          .style("fill-opacity", d => d.opacity ?? 1)
+          .call(this.commons.d3helper.tooltip(object));
+        
 
+
+    this.forcePropagation(circlesPro);
+    }
+    
+    
     public circle(object, position) {
         let circlesPro = this.commons.svgContainer.append("g")
             .attr("class", "pointPosition featureLine")
             .attr("transform", "translate(0," + position + ")")
-            .attr("id", () => {
-                // random string
-                // return divId + '_' + d.title.split(" ").join("_") + '_g'
-                return 'c' + object.id + '_container'
-            });
-
+            .attr("id", () => 'c' + object.id + '_container');
+    
         let dataLine = [];
-        dataLine.push([{
-            x: 1,
-            y: 0
-        }, {
-            x: this.commons.fvLength,
-            y: 0
-        }]);
-
+        dataLine.push([{ x: 1, y: 0 }, { x: this.commons.fvLength, y: 0 }]);
+    
         // basal line
         circlesPro.selectAll(".line " + object.className)
             .data(dataLine)
@@ -836,61 +820,37 @@ class FillSVG extends ComputingFunctions {
             .style("z-index", "0")
             .style("stroke", 'grey')
             .style("stroke-width", "0.5px");
-
+    
         let readyData = [...object.data];
-
+    
         circlesPro.selectAll("." + object.className + 'Circle')
             .data(readyData)
             .enter()
             .append("circle")
-            //.attr("clip-path", "url(#clip)")
             .attr("class", "element " + object.className)
-            .attr("id", (d) => {
-                return "f_" + object.id;
-            })
-            // circle dimensions
-            .attr("cx", (d) => {
-                return this.commons.scaling(d.x)
-            })
-            .attr("cy", "5") // same as height
-            // circle radius
-            .attr("r", (d) => {
-                if (d.y<=1) {
-                    return d.y*this.commons.elementHeight
+            .attr("id", d => "f_" + object.id)
+            .attr("cx", d => this.commons.scaling(d.x))
+            .attr("cy", "5")
+            .attr("r", d => {
+                if (d.y <= 1) {
+                    return d.y * this.commons.elementHeight;
                 } else {
-                    this.commons.logger.warn("Maximum circle radius is 1", {method:'addFeatures',fvId:this.commons.divId,featureId:object.id})
-                    return this.commons.elementHeight
+                    this.commons.logger.warn("Maximum circle radius is 1", { method: 'addFeatures', fvId: this.commons.divId, featureId: object.id });
+                    return this.commons.elementHeight;
                 }
             })
-            .attr("width", (d) => {
-                if (this.commons.scaling(d.x + 0.4) - this.commons.scaling(d.x - 0.4) < 2) return 2;
-                else return this.commons.scaling(d.x + 0.4) - this.commons.scaling(d.x - 0.4);
+            .attr("width", d => {
+                let w = this.commons.scaling(d.x + 0.4) - this.commons.scaling(d.x - 0.4);
+                return w < 2 ? 2 : w;
             })
-            .style("fill", (d) => {
-                return d.color || object.color
-            })
-            .style("fill-opacity", (d) => {
-                if (d.opacity) {
-                    return d.opacity
-                } else if (object.opacity) {
-                    return object.opacity
-                } else {
-                    return "1"
-                }
-            })
-            .style("stroke", (d) => {
-                if ("stroke" in d) {
-                    return d.stroke
-                } else if ("stroke" in object) {
-                    return object.stroke
-                } else {
-                    return d.color
-                }
-            })
+            .style("fill", d => d.color || object.color)
+            .style("fill-opacity", d => d.opacity ?? object.opacity ?? "1")
+            .style("stroke", d => d.stroke ?? object.stroke ?? d.color)
             .call(this.commons.d3helper.tooltip(object));
-
+    
         this.forcePropagation(circlesPro);
     }
+    
 
     public path(object, position) {
 
@@ -1272,6 +1232,58 @@ class FillSVG extends ComputingFunctions {
         super(commons);
         this.preComputing = new PreComputing(commons);
     }
+
+    public ptmTriangle(object, position) {
+        console.log("[PTM] ptmTriangle render called", object);
+        const triangleGroup = this.commons.svgContainer.append("g")
+            .attr("class", "pointPosition featureLine")
+            .attr("transform", "translate(0," + position + ")")
+            .attr("id", 'c' + object.id + '_container');
+    
+        // === Baseline line (like lollipop) ===
+        const dataLine = [[{ x: 1, y: 0 }, { x: this.commons.fvLength, y: 0 }]];
+    
+        triangleGroup.selectAll(".line " + object.className)
+            .data(dataLine)
+            .enter()
+            .append("path")
+            .attr("d", this.commons.line)
+            .attr("class", "line " + object.className)
+            .style("stroke", "gray")
+            .style("stroke-width", "0.5px");
+    
+        // === Draw triangle markers ===
+        const triangleSize = 6;
+const halfWidth = 4;
+const verticalSpacing = 6;
+
+triangleGroup.selectAll(".ptm-triangle")
+    .data(object.data)
+    .enter()
+    .append("polygon")
+    .attr("class", "ptm-triangle")
+    .attr("points", d => {
+        const cx = this.commons.scaling(d.x);                     // Zoom-safe X
+        const cy = -d._stackY * verticalSpacing;                  // Stack upward
+        const tip = [0, 0];                                       // Triangle tip
+        const left = [-halfWidth, -triangleSize];                 // left point
+        const right = [halfWidth, -triangleSize];                 // right point
+        return `${tip.join(',')} ${left.join(',')} ${right.join(',')}`;
+    })
+    .attr("transform", d => {
+        const cx = this.commons.scaling(d.x);
+        const cy = -d._stackY * verticalSpacing;
+        return `translate(${cx}, ${cy})`;
+    })
+    .style("fill", d => d.color || object.color)
+    .style("stroke", d => d.stroke ?? object.stroke ?? d.color)
+    .style("fill-opacity", d => d.opacity ?? object.opacity ?? 1)
+    .call(this.commons.d3helper.tooltip(object));
+    
+        this.forcePropagation(triangleGroup);
+    }
+    
+
 }
 
 export default FillSVG;

@@ -262,4 +262,31 @@ export class Transition extends ComputingFunctions {
     constructor(commons: {}) {
         super(commons);
     }
+
+    public ptmTriangle(object) {
+        const container = this.commons.svgContainer.select(`#c${object.id}_container`);
+    
+        let transit;
+        if (this.commons.animation) {
+            transit = container.selectAll(".ptm-triangle")
+                .transition()
+                .duration(500);
+        } else {
+            transit = container.selectAll(".ptm-triangle");
+        }
+    
+        const triangleSize = 6;
+        const halfWidth = 4;
+    
+        transit
+            .attr("points", d => {
+                const cx = this.commons.scaling(d.x);  // zoom-aware X
+                const cy = -d._stackY;                 // stacked Y
+                const tip = [cx, cy];
+                const left = [cx - halfWidth, cy - triangleSize];
+                const right = [cx + halfWidth, cy - triangleSize];
+                return `${tip.join(',')} ${left.join(',')} ${right.join(',')}`;
+            });
+    }
+    
 };

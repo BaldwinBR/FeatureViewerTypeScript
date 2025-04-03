@@ -673,6 +673,8 @@ class FeatureViewer {
                 this.transition.lollipop(o);
             } else if (o.type === "curve") {
                 this.transition.lineTransition(o);
+            } else if (o.type === 'ptmTriangle') {
+                this.transition.ptmTriangle(o);
             }
             // resize basal line too
             this.transition.basalLine(o);
