@@ -1065,8 +1065,6 @@ class FillSVG extends ComputingFunctions {
                 segments.push(currentSegment)
             }
 
-            console.log(segments)
-
             // Construct SVG path objects for each new segment
             // To form continuous line, midpoint between segments generated
             segments.forEach((seg, index) => {
