@@ -1008,17 +1008,16 @@ class FillSVG extends ComputingFunctions {
                 }]
             };
             
-            for (let i  = 1; i < line.length; i++){
+            for (let i  = 0; i < line.length; i++){
                 let point = line[i];
 
-                // If the current point has x === -1
+                // If the current point has y === -1
                 // start a new segment
                 if (point.y === -1) {
 
-                    // Only push the current segment if it's not empty
-                    // Checks if very first value was -1 to ensure
-                    // starting segment of length 1 of value -1 does not get pushed
-                    if (currentSegment.points.length > 0 && i != 1) { //TODO: Ensure this fully fixes functionality
+                    // Push the current segment only if it's not empty
+                    // Special case Catch: Skip pushing if it's the first segment and has a length of 1 with a value of -1
+                    if (currentSegment.points.length > 0 && i != 1) {
                         segments.push(currentSegment);
                     }
 
