@@ -342,7 +342,10 @@ class FillSVG extends ComputingFunctions {
         // ad areas in any case
         if (object.sidebar) {
 
-            let multiButtonSpacing = 0;
+            // Buttons within same sidbar object are stacked with this offset
+            // iterated at bottom of loop 
+            let multiButtonSpacing = 0; 
+
             let objectPos = 0;
             // check type and add html elements accordingly
             for (const bt of object.sidebar) {
@@ -1077,26 +1080,28 @@ class FillSVG extends ComputingFunctions {
 
                     // Special case: segment length is 1
                     // SVG path objects cannot be length of 1
-                    // 0.5 will be hidden by tooltip
+                    // 0.5 added will be hidden by tooltip
                     if (seg.points.length === 1) {
-                        // Create two midpoints: one behind, one ahead
-                        const midPointBehind = {
-                            ...currLast,
-                            x: currLastx - 0.5,
-                            y: currLast.y 
-                        };
+                        // Create two midpoints: one ahead, one behind
                         const midPointAhead = {
                             ...currLast,
                             x: currLastx + 0.5,
-                            y: currLast.y 
+                            y: currLast.y
                         };
 
-                        // Add midpoints to the current segment
-                        seg.points.unshift(midPointBehind);
+                        // Only add the "behind" midpoint if it's not the first segment
+                        if (index !== 0) {
+                            const midPointBehind = {
+                                ...currLast,
+                                x: currLastx - 0.5,
+                                y: currLast.y
+                            };
+                            seg.points.unshift(midPointBehind);
+                        }
+
                         seg.points.push(midPointAhead);
                     }
-                    
-                    
+
                     if (nextFirstx == shouldbenext){
 
                         // Create midpoint between curr seg and next
