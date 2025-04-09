@@ -768,11 +768,19 @@ class FeatureViewer {
         if (!tickArray.includes(this.commons.fvLength - 1)) tickArray.push(this.commons.fvLength - 1);
         */
 
+        /*
         //Create Axis
         this.commons.xAxis = d3.axisBottom(this.commons.scaling)
             .tickValues(tickArray)
         //.scale(this.commons.scaling) // TODO
         //.tickFormat(d3.format("d"));
+        */
+
+        //Create Axis
+        this.commons.xAxis = d3.axisBottom(this.commons.scaling)
+            .ticks(10)
+            // Ensures removal of non int values like 0.5
+            .tickFormat(d => (Number.isInteger(d) && d !== 0) ? d.toString() : "");
 
         let yAxisScale = d3.scaleBand()
             //.domain([0, this.commons.yData.length])
