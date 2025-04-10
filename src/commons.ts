@@ -82,6 +82,7 @@ class Commons {
     public yAxisSVG: any;
     public yAxisSVGGroup: any;
     public xAxis: any;
+    public xAxisTop: any;
     public line: any;
     public lineBond: any;
     public brush: any;
