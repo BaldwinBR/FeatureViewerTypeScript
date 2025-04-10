@@ -473,6 +473,7 @@ class FeatureViewer {
                     // apply transitions
                     this.transition_data(this.commons.features, currentShift);
                     this.fillSVG.reset_axis();
+                    this.fillSVG.reset_axisTop();
 
                     // remove sequence
 
@@ -650,6 +651,7 @@ class FeatureViewer {
 
             this.transition_data(this.commons.features, this.commons.current_extend.start);
             this.fillSVG.reset_axis();
+            this.fillSVG.reset_axisTop();
             this.fillSVG.resizeBrush()
 
         }
@@ -749,16 +751,17 @@ class FeatureViewer {
                 return d['y'] + 6;
                 //return (d[0] as any).y + 6;
             });
-
+        /*
         let rtickStep = Math.round(this.commons.fvLength/10); // fraction of a tenth
         //let tickStep = Math.round(rtickStep/10)*10; // nearest 10th multiple
         let tickStep = Math.round(rtickStep/20)*10; // nearest 10th multiple
-
+        
         // TODO: add 0 and last value to array --Ben
         let tickArray = Array.from(Array(this.commons.fvLength).keys())
             .filter(function (value, index, ar) {
                 return (index % tickStep == 0 && index !== 0);
             });
+        
         /*
         let tickArray = Array.from(Array(this.commons.fvLength).keys())
         .filter((value, index) => index % tickStep == 0)
@@ -782,7 +785,13 @@ class FeatureViewer {
             // Ensures removal of non int values like 0.5
             .tickFormat(d => (Number.isInteger(d) && d !== 0) ? d.toString() : "");
 
-        let yAxisScale = d3.scaleBand()
+        //Create Axis
+        this.commons.xAxisTop = d3.axisTop(this.commons.scaling)
+            .ticks(10)
+            // Ensures removal of non int values like 0.5
+            .tickFormat(d => (Number.isInteger(d) && d !== 0) ? d.toString() : "");
+        
+            let yAxisScale = d3.scaleBand()
             //.domain([0, this.commons.yData.length])
             .rangeRound([0, 500]);
 
@@ -1060,6 +1069,7 @@ class FeatureViewer {
         }
 
         this.fillSVG.addXAxis(this.commons.YPosition);
+        this.fillSVG.addXAxisTop(this.commons.YPosition);
         this.addYAxis();
 
         if (this.commons.viewerOptions.brushActive) {
@@ -1138,6 +1148,7 @@ class FeatureViewer {
         }
 
         this.fillSVG.updateXAxis(this.commons.YPosition);
+        this.fillSVG.updateXAxisTop(this.commons.YPosition);
         this.calculate.updateSVGHeight(this.commons.YPosition + 5);
 
         // update brush
@@ -1287,6 +1298,7 @@ class FeatureViewer {
 
         this.transition_data(this.commons.features, this.commons.viewerOptions.offset.start);
         this.fillSVG.reset_axis();
+        this.fillSVG.reset_axisTop();
 
         // Fire Event
         if (CustomEvent) {
@@ -1441,6 +1453,7 @@ class FeatureViewer {
 
         // fix axis
         this.fillSVG.updateXAxis(this.commons.step)
+        this.fillSVG.updateXAxisTop(this.commons.step)
 
         // transit svgContent
         let container = d3.select(`#${this.divId} #svgContent`);

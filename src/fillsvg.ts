@@ -342,7 +342,7 @@ class FillSVG extends ComputingFunctions {
         // ad areas in any case
         if (object.sidebar) {
 
-            // Buttons within same sidbar object are stacked with this offset
+            // Buttons within same sidebar object are stacked with this offset
             // iterated at bottom of loop 
             let multiButtonSpacing = 0; 
 
@@ -1216,13 +1216,13 @@ class FillSVG extends ComputingFunctions {
             this.commons.svgContainer.transition().duration(500);
         }
         this.commons.svgContainer
-            .select(".x.axis")
+            .select(".XAxisBottom")
             .call(this.commons.xAxis);
     }
 
     public addXAxis(position) {
         this.commons.svgContainer.append("g")
-            .attr("class", "x axis XAxis")
+            .attr("class", "x axis XAxisBottom")
             .attr("transform", "translate(0," + (position + 20) + ")")
             .call(this.commons.xAxis);
         if (!this.commons.viewerOptions.showAxis) {
@@ -1232,9 +1232,37 @@ class FillSVG extends ComputingFunctions {
     };
 
     public updateXAxis(position) {
-        this.commons.svgContainer.selectAll(".XAxis")
+        this.commons.svgContainer.selectAll(".XAxisBottom")
             .attr("transform", "translate(0," + (position + this.commons.step) + ")");
     };
+    
+    // AXIS Top FUNCTIONS
+    public reset_axisTop() {
+        if (this.commons.animation) {
+            this.commons.svgContainer.transition().duration(500);
+        }
+        this.commons.svgContainer
+            .select(".XAxisTop")
+            .call(this.commons.xAxisTop);
+    }
+
+    public addXAxisTop(position) {
+        this.commons.svgContainer.append("g")
+            .attr("class", "x axis XAxisTop")
+            .attr("transform", "translate(0," + (position + 20) + ")")
+            .call(this.commons.xAxisTop);
+        if (!this.commons.viewerOptions.showAxis) {
+            d3.select(`#${this.commons.divId}`).selectAll(".tick")
+                .attr("display", "none")
+        }
+    };
+
+    public updateXAxisTop(position) {
+        this.commons.svgContainer.selectAll(".XAxisTop")
+            .attr("transform", "translate(0," + (this.commons.step - this.commons.elementHeight) + ")");
+            //.attr("transform", "translate(0," + (position + this.commons.step - 1210) + ")");
+    };
+
 
     // BRUSH FUNCTION
 
