@@ -321,6 +321,22 @@ class FillSVG extends ComputingFunctions {
             this.lollipop(feature, this.commons.YPosition);
 
         }
+        else if (feature.type === "ptmTriangle") {
+            const baseHeight = 14;
+            const verticalSpacing = 14;
+            const scalingFactor = 0.6;
+            
+            // the height won't change if the stack of triangles are less than 5
+            // will dynamically change the height according to the number of stacks.
+            if (feature.maxStackSize <= 5) {
+                this.commons.YPosition += baseHeight;
+            } else {
+                this.commons.YPosition += baseHeight + (feature.maxStackSize - 5) * verticalSpacing * scalingFactor;
+            }
+
+        
+            this.ptmTriangle(feature, this.commons.YPosition);
+        }
     }
 
     public tagArea(object, thisYPosition) {
@@ -1208,6 +1224,59 @@ class FillSVG extends ComputingFunctions {
             .call(this.commons.d3helper.tooltip(object));
 
         this.forcePropagation(rects);
+    }
+
+    // PTM TRIANGLES
+    public ptmTriangle(object, position) {
+        const triangleGroup = this.commons.svgContainer.append("g")
+            .attr("class", "pointPosition featureLine")
+            .attr("transform", "translate(0," + position + ")")
+            .attr("id", 'c' + object.id + '_container');
+    
+        // === Baseline line ===
+        const dataLine = [[{ x: 1, y: 0 }, { x: this.commons.fvLength, y: 0 }]];
+    
+        triangleGroup.selectAll(".line " + object.className)
+            .data(dataLine)
+            .enter()
+            .append("path")
+            .attr("d", this.commons.line)
+            .attr("class", "line " + object.className)
+            .style("stroke", "gray")
+            .style("stroke-width", "0.5px");
+    
+        // === Draw triangle markers ===
+        const triangleSize = 6;
+        const halfWidth = 4;
+        const verticalSpacing = triangleSize;
+
+        triangleGroup.selectAll(".ptm-triangle")
+            .data(object.data)
+            .enter()
+            .append("polygon")
+            .attr("class", "ptm-triangle")
+            .attr("points", d => {
+                const cx = this.commons.scaling(d.x);
+                // Stack upward
+                const cy = -d._stackY * verticalSpacing;
+                // Triangle tip
+                const tip = [0, 0];
+                // Left and Right points
+                const left = [-halfWidth, -triangleSize];
+                const right = [halfWidth, -triangleSize];
+                return `${tip.join(',')} ${left.join(',')} ${right.join(',')}`;
+            })
+            .attr("transform", d => {
+                const cx = this.commons.scaling(d.x);
+                const cy = -d._stackY * verticalSpacing;
+                return `translate(${cx}, ${cy})`;
+            })
+            .style("fill", d => d.color || object.color)
+            .style("stroke", d => d.stroke ?? object.stroke ?? d.color)
+            .style("fill-opacity", d => d.opacity ?? object.opacity ?? 1)
+            .call(this.commons.d3helper.tooltip(object));
+        
+        this.forcePropagation(triangleGroup);
     }
 
     // AXIS FUNCTIONS

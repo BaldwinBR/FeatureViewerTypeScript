@@ -676,6 +676,9 @@ class FeatureViewer {
             } else if (o.type === "curve") {
                 this.transition.lineTransition(o);
             }
+            else if (o.type === 'ptmTriangle') {
+                this.transition.ptmTriangle(o);
+            }
             // resize basal line too
             this.transition.basalLine(o);
             // apply recursively to subfeatures (if shown)

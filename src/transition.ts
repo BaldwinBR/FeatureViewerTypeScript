@@ -150,6 +150,34 @@ export class Transition extends ComputingFunctions {
 
     }
 
+    // PTM TRIANGLE
+    public ptmTriangle(object) {
+        const container = this.commons.svgContainer.select(`#c${object.id}_container`);
+    
+        let transit;
+        if (this.commons.animation) {
+            transit = container.selectAll(".ptm-triangle")
+                .transition()
+                .duration(500);
+        } else {
+            transit = container.selectAll(".ptm-triangle");
+        }
+    
+        const triangleSize = 6;
+        const halfWidth = 4;
+    
+        transit
+            .attr("points", d => {
+                const cx = this.commons.scaling(d.x);
+                // Stacked Y
+                const cy = -d._stackY;
+                const tip = [cx, cy];
+                const left = [cx - halfWidth, cy - triangleSize];
+                const right = [cx + halfWidth, cy - triangleSize];
+                return `${tip.join(',')} ${left.join(',')} ${right.join(',')}`;
+            });
+    }
+
     public circle(object) {
 
         let container = this.commons.svgContainer.select(`#c${object.id}_container`);
