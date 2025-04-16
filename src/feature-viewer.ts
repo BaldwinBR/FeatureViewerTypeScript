@@ -304,7 +304,7 @@ class FeatureViewer {
                     cvm = 17
                 }
                 // horizontal flag placement
-                this.commons.headMargin = 20;
+                this.commons.headMargin = 0;
                 if (d.ladderLabel == null) {
                     if (d.flagLevel) {
                         this.commons.headMargin = 20 * (d.flagLevel - 1);
@@ -326,13 +326,15 @@ class FeatureViewer {
                 if (this.commons.viewerOptions.mobileMode) {
                     return this.calcFlagWidth(d);
                 } else {
-                    let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth  // 20 + (20 * d.flagLevel) --> 0
+                    //let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth  // 20 + (20 * d.flagLevel) --> 0
+                    let margin = 15;
                     return this.commons.viewerOptions.margin.left - margin; // chevron margin and text indent
                 }
             })
             .attr("height", this.commons.step)
             .html((d) => {
-                return d.label;
+                //return d.label;
+                return `<div xmlns="http://www.w3.org/1999/xhtml" style="text-align: right; width: 100%; height: 100%; overflow: hidden;">${d.label}</div>`;
             });
 
 
@@ -541,7 +543,8 @@ class FeatureViewer {
                     // text width depends on mobile width, flaglevel and presence of subfeatures icon
                     return this.calcFlagWidth(d);
                 } else {
-                    let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth   // 20 + (20 * d['flagLevel']) --> 0
+                    //let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth   // 20 + (20 * d['flagLevel']) --> 0
+                    let margin = 15
                     return this.commons.viewerOptions.margin.left - margin; // chevron margin and text indent
                 }
             });
@@ -563,12 +566,12 @@ class FeatureViewer {
     }
 
     private calcFlagWidth(d) {
-        this.commons.headMargin = 20;  // 20 * (d.flagLevel - 1)
+        this.commons.headMargin = 0;  // 20 * (d.flagLevel - 1)
         let totalspace = 0
         if ('hasSubFeatures' in d && d.hasSubFeatures) {totalspace} // {totalspace += 20}
 
         if (this.commons.headMargin) {totalspace += this.commons.headMargin + 8}
-        let space = this.commons.viewerOptions.labelTrackWidthMobile - 15 - totalspace
+        let space = this.commons.viewerOptions.labelTrackWidthMobile - 8 - totalspace
         if (space < 20) {
             return '0px';
         } else {
