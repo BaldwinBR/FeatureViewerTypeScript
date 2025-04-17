@@ -297,7 +297,7 @@ class FillSVG extends ComputingFunctions {
         else if (feature.type === "curve") {
 
             // this type of object overwrites object data, after fillSVG go back to original
-            this.storeData = feature.data;
+            this.storeData = JSON.parse(JSON.stringify(feature.data));
             if (!(Array.isArray(feature.data[0]))) feature.data = [feature.data];
             if (!(Array.isArray(feature.color))) feature.color = [feature.color];
             let negativeNumbers = false;
@@ -1140,7 +1140,8 @@ class FillSVG extends ComputingFunctions {
                     }
                         
                 }
-                
+               
+                if (object.toggle == true){
                 histoG.selectAll(null) //"." + object.className + i
                     .data([seg.points])
                     .enter()
@@ -1163,7 +1164,7 @@ class FillSVG extends ComputingFunctions {
                     .style("z-index", "3")
                     .style("stroke-width", "2px")
                     .call(this.commons.d3helper.tooltip(object));
-
+                }
                 })
 
         });
