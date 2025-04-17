@@ -1228,14 +1228,18 @@ class FillSVG extends ComputingFunctions {
 
     // PTM TRIANGLES
     public ptmTriangle(object, position) {
+        // Remove any existing PTM triangle group to avoid duplicate rendering
+        this.commons.svgContainer.select(`#c${object.id}_container`).remove();
+    
+        // Create a new group for this PTM feature
         const triangleGroup = this.commons.svgContainer.append("g")
             .attr("class", "pointPosition featureLine")
             .attr("transform", "translate(0," + position + ")")
             .attr("id", 'c' + object.id + '_container');
     
-        // === Baseline line ===
+        // Baseline
         const dataLine = [[{ x: 1, y: 0 }, { x: this.commons.fvLength, y: 0 }]];
-    
+        
         triangleGroup.selectAll(".line " + object.className)
             .data(dataLine)
             .enter()
@@ -1245,11 +1249,11 @@ class FillSVG extends ComputingFunctions {
             .style("stroke", "gray")
             .style("stroke-width", "0.5px");
     
-        // === Draw triangle markers ===
+        // triangle markers
         const triangleSize = 6;
         const halfWidth = 4;
         const verticalSpacing = triangleSize;
-
+    
         triangleGroup.selectAll(".ptm-triangle")
             .data(object.data)
             .enter()
@@ -1257,25 +1261,17 @@ class FillSVG extends ComputingFunctions {
             .attr("class", "ptm-triangle")
             .attr("points", d => {
                 const cx = this.commons.scaling(d.x);
-                // Stack upward
                 const cy = -d._stackY * verticalSpacing;
-                // Triangle tip
-                const tip = [0, 0];
-                // Left and Right points
-                const left = [-halfWidth, -triangleSize];
-                const right = [halfWidth, -triangleSize];
+                const tip = [cx, cy];
+                const left = [cx - halfWidth, cy - triangleSize];
+                const right = [cx + halfWidth, cy - triangleSize];
                 return `${tip.join(',')} ${left.join(',')} ${right.join(',')}`;
-            })
-            .attr("transform", d => {
-                const cx = this.commons.scaling(d.x);
-                const cy = -d._stackY * verticalSpacing;
-                return `translate(${cx}, ${cy})`;
             })
             .style("fill", d => d.color || object.color)
             .style("stroke", d => d.stroke ?? object.stroke ?? d.color)
             .style("fill-opacity", d => d.opacity ?? object.opacity ?? 1)
             .call(this.commons.d3helper.tooltip(object));
-        
+    
         this.forcePropagation(triangleGroup);
     }
 

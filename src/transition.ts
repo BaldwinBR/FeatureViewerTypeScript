@@ -153,24 +153,28 @@ export class Transition extends ComputingFunctions {
     // PTM TRIANGLE
     public ptmTriangle(object) {
         const container = this.commons.svgContainer.select(`#c${object.id}_container`);
+        
+        // Exit early if the container is not found
+        if (container.empty()) return;
     
-        let transit;
-        if (this.commons.animation) {
-            transit = container.selectAll(".ptm-triangle")
-                .transition()
-                .duration(500);
-        } else {
-            transit = container.selectAll(".ptm-triangle");
-        }
+        // Determine if a transition animation should be applied
+        let transit = this.commons.animation
+            ? container.selectAll(".ptm-triangle").transition().duration(500)
+            : container.selectAll(".ptm-triangle");
     
+        // Triangle size parameters
         const triangleSize = 6;
         const halfWidth = 4;
+        const verticalSpacing = triangleSize;
     
+        // Update the triangle positions when zoomed
         transit
             .attr("points", d => {
                 const cx = this.commons.scaling(d.x);
-                // Stacked Y
-                const cy = -d._stackY;
+                
+                // Maintain the same stacked vertical offset
+                const cy = -d._stackY * verticalSpacing;
+    
                 const tip = [cx, cy];
                 const left = [cx - halfWidth, cy - triangleSize];
                 const right = [cx + halfWidth, cy - triangleSize];
