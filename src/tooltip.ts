@@ -342,12 +342,15 @@ class Tool extends Calculate {
                             this.commons.viewerOptions.labelTrackWidth,
                         );
 
+                        // unavailable data
+                        if (elemHover.color == "#c0c0c0") {
+                            return `
+                            <p style="margin:2px;font-weight:700;">${"Unavailable"}</p>
+                        `;
+                        }
+
                         let sequence = this.commons.stringSequence;
                         
-                        // If the feature has a customTooltip, call it with the hovered data point
-                         if (object.customTooltip && elemHover) {
-                             return object.customTooltip(elemHover);
-                         }
                         
                         if (elemHover) {
                             // Line segments are connected with fake midpoints for fluid visuals
@@ -356,26 +359,154 @@ class Tool extends Calculate {
                             // Checking if the sequence number is valid is a check for this
                             if(sequence[elemHover.x] != undefined){
                                 // secondary structure
-                                if (object.flag == 1) {
+                            if (object.flag == 1) {
+                                if (elemHover.color == "#cf6275") {
                                     return `
-                                    <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                                    <p style="margin:2px;font-weight:700;">${"Helix"}</p>
                                     <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
                                     <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
-                                    <p style="margin:2px;">Type: ${object.label}</p>
+                                    <p style="margin:2px;">Type: ${"Helix"}</p>
                                 `;
                                 }
-                                // Default formatting for curves
-                                return `
-                                    <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                                if (elemHover.color == "#fffd01") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"Strand"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                    <p style="margin:2px;">Type: ${"Strand"}</p>
+                                `;
+                                }
+                                if (elemHover.color == "#25a36f") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"Coil"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                    <p style="margin:2px;">Type: ${"Coil"}</p>
+                                `;
+                                }
+                            }
+                            // ASA SCORES 
+                            if (object.flag == 2) {
+                                if (elemHover.color == "#ffd2df") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"Predicted Solvent Accessibility"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                                if (elemHover.color == "#fc0080") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"Native Solvent Accessibility"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                            }
+                            // PROTEIN SCORES
+                            if (object.flag == 3) {
+                                if (elemHover.color == "#3d7afd") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"DisoRDPbind Score"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                                if (elemHover.color == "#3b5b92") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"SCRIBER Score"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                                if (elemHover.color == "#01889f") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"MoRFchibi Score"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                            }
+                            // DNA SCORES
+                            if (object.flag == 4) {
+                                if (elemHover.color == "#c071fe") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"DisoRDPbind DNA Score"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                                if (elemHover.color == "#ce5dae") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"DRNApred DNA Score"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                            }
+                            // RNA SCORES
+                            if (object.flag == 5) {
+                                if (elemHover.color == "#fcc006") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"DRNApred RNA Score"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                                if (elemHover.color == "#fdff38") {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"DisoRDPbind RNA Score"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                                }
+                            }
+                            // PREDICTED DISORDERED SCORE
+                            if (object.flag == 6) {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"Predicted Disordered Score"}</p>
                                     <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
                                     <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
                                 `;
                             }
-                            else{
-                                return null 
-                            } 
-                        }
+                            // SIGNAL PEPTIDES SCORE
+                            if (object.flag == 7) {
+                                    return `
+                                    <p style="margin:2px;font-weight:700;">${"Signal Peptides Score"}</p>
+                                    <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                    <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                                `;
+                            }
+                            // CONSERVATION SCORE
+                            if (object.flag == 8) {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Score"}</p>
+                                <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                            `;
+                            }
+                            // LINKER SCORE
+                            if (object.flag == 9) {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Linker Score"}</p>
+                                <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                            `;
+                            }
+                            // Default formatting for curves
+                            return `
+                                <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
+                                <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
+                                <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
+                            `;
+                        } }
                     } else if (object.type === "rect") {
+                        // unavailable data
+                        if (pD.color == "#c0c0c0") {
+                            return `
+                            <p style="margin:2px;font-weight:700;">${"Unavailable"}</p>
+                        `;
+                        }
+
                         // Handle rectangles (regions)
                         let startPos = pD.x;
                         let endPos = pD.y;
@@ -395,8 +526,32 @@ class Tool extends Calculate {
                         // Get the sequence at exact position
                         let sequence = this.commons.stringSequence[exactPos];
 
-                        // secondary structure
+                        // secondary structure - different types determined by hex codes assigned in feature-constructor
                         if (object.flag == 2) {
+                            if (pD.color == "#cf6275") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Helix"}</p>
+                                <p style="margin:2px;">Region: ${pD.x} - ${pD.y}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                                <p style="margin:2px;">Type: ${"Helix"}</p>
+                            `;
+                            }
+                            if (pD.color == "#fffd01") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Strand"}</p>
+                                <p style="margin:2px;">Region: ${pD.x} - ${pD.y}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                                <p style="margin:2px;">Type: ${"Strand"}</p>
+                            `;
+                            }
+                            if (pD.color == "#25a36f") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Coil"}</p>
+                                <p style="margin:2px;">Region: ${pD.x} - ${pD.y}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                                <p style="margin:2px;">Type: ${"Coil"}</p>
+                            `;
+                            }
                             return `
                             <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
                             <p style="margin:2px;">Region: ${pD.x} - ${pD.y}</p>
@@ -411,13 +566,78 @@ class Tool extends Calculate {
                             <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
                         `;
                         }
-                        // conservation level
+                        // conservation level - different levels determined by hex codes assigned in feature-constructor
                         if (object.flag == 4) {
-                            return `
-                            <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
-                            <p style="margin:2px;">Level ${object.label}</p>
-                            <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
-                        `;
+                            if (pD.color == "#f0f3f5") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 1"}</p>
+                                <p style="margin:2px;">Level ${"1"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#d8dadc") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 2"}</p>
+                                <p style="margin:2px;">Level ${"2"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#d1dae0") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 3"}</p>
+                                <p style="margin:2px;">Level ${"3"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#b3c2cb") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 4"}</p>
+                                <p style="margin:2px;">Level ${"4"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#95aab7") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 5"}</p>
+                                <p style="margin:2px;">Level ${"5"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#7691a2") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 6"}</p>
+                                <p style="margin:2px;">Level ${"6"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#5d7889") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 7"}</p>
+                                <p style="margin:2px;">Level ${"7"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#485d6a") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 8"}</p>
+                                <p style="margin:2px;">Level ${"8"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#34434c") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 9"}</p>
+                                <p style="margin:2px;">Level ${"9"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
+                            if (pD.color == "#1f282e") {
+                                return `
+                                <p style="margin:2px;font-weight:700;">${"Conservation Level 10"}</p>
+                                <p style="margin:2px;">Level ${"10"}</p>
+                                <p style="margin:2px;">Position: ${exactPos}${sequence}</p>
+                            `;
+                            }
                         }
 
                         // Default formatting for rectangles
