@@ -93,6 +93,7 @@ export interface FeatureObject {
   customTooltip?: (data: any) => string,
   flag?: number;
   maxStackSize?: number;
+  toggle?: boolean;
 }
 
 export interface FeatureData {

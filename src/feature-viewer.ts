@@ -327,7 +327,7 @@ class FeatureViewer {
                     return this.calcFlagWidth(d);
                 } else {
                     //let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth  // 20 + (20 * d.flagLevel) --> 0
-                    let margin = 15;
+                    let margin = 8;
                     return this.commons.viewerOptions.margin.left - margin; // chevron margin and text indent
                 }
             })
@@ -544,7 +544,7 @@ class FeatureViewer {
                     return this.calcFlagWidth(d);
                 } else {
                     //let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth   // 20 + (20 * d['flagLevel']) --> 0
-                    let margin = 15
+                    let margin = 8
                     return this.commons.viewerOptions.margin.left - margin; // chevron margin and text indent
                 }
             });
@@ -1132,6 +1132,10 @@ class FeatureViewer {
             object.color = "#DFD5F5";
         }
 
+        if (object.toggle === undefined){
+            object.toggle = true;
+        }
+
         //object.height = this.commons.elementHeight;
         object.flagLevel = flagLevel;
 
@@ -1336,9 +1340,23 @@ class FeatureViewer {
         this.drawFeatures()
     }
 
+    
     // Toggle Features Graphs On/Off
-    public featureToggle(){
-        //this.transition.lineTransition(); 
+    public featureToggle(buttonId: string){
+
+        for (let i = 0; i < this.commons.features.length; i ++){
+            if (this.commons.features[i].id == buttonId){
+
+                console.log(this.commons.features[i].toggle)
+
+                this.commons.features[i].toggle = !this.commons.features[i].toggle;
+                    
+                    // features already in viewer? empty it before drawing
+                    this.commons.features = this.emptyFeatures()
+                    // draw the viewer
+                    this.drawFeatures()
+            }
+        }
     }
 
     public downloadSvg() {
