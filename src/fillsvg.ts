@@ -987,6 +987,7 @@ class FillSVG extends ComputingFunctions {
                 y: number;
                 description: string;
                 tooltip: string;
+                color: string; // preserve color data in point for tooltips
             }
 
             interface Segment {
@@ -1005,6 +1006,7 @@ class FillSVG extends ComputingFunctions {
                     y: line[0].y,
                     description: line[0].description,
                     tooltip: line[0].tooltip,
+                    color: line[0].color
                 }]
             };
             
@@ -1040,6 +1042,7 @@ class FillSVG extends ComputingFunctions {
                         y: point.y,
                         description: point.description,
                         tooltip: point.tooltip,
+                        color: point.color
                     })
                 } else {
                     // New color encountered, add currentSegment and start a new
@@ -1054,6 +1057,7 @@ class FillSVG extends ComputingFunctions {
                             y: point.y,
                             description: point.description,
                             tooltip: point.tooltip,
+                            color: point.color
                         }]
                     };
                 }
