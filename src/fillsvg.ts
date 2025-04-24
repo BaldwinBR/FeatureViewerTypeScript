@@ -1224,7 +1224,7 @@ class FillSVG extends ComputingFunctions {
             .call(this.commons.d3helper.tooltip(object));
 
         this.forcePropagation(rects);
-    }
+    } 
 
     // PTM TRIANGLES
     public ptmTriangle(object, position) {

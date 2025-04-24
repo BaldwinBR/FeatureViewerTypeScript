@@ -180,7 +180,7 @@ export class Transition extends ComputingFunctions {
                 const right = [cx + halfWidth, cy - triangleSize];
                 return `${tip.join(',')} ${left.join(',')} ${right.join(',')}`;
             });
-    }
+    } 
 
     public circle(object) {
 
