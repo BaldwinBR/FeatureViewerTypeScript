@@ -322,18 +322,13 @@ class FillSVG extends ComputingFunctions {
 
         }
         else if (feature.type === "ptmTriangle") {
-            const baseHeight = 14;
-            const verticalSpacing = 14;
-            const scalingFactor = 0.6;
-            
-            // the height won't change if the stack of triangles are less than 5
-            // will dynamically change the height according to the number of stacks.
-            if (feature.maxStackSize <= 5) {
-                this.commons.YPosition += baseHeight;
-            } else {
-                this.commons.YPosition += baseHeight + (feature.maxStackSize - 5) * verticalSpacing * scalingFactor;
-            }
-
+            const triangleSize = 16;
+            const verticalSpacing = triangleSize;
+            const baseHeight = triangleSize * 5;
+            const extraHeight = (feature.maxStackSize > 5)
+                ? (feature.maxStackSize - 5) * verticalSpacing
+                : 0;
+            this.commons.YPosition += baseHeight + extraHeight;
         
             this.ptmTriangle(feature, this.commons.YPosition);
         }
@@ -1236,10 +1231,17 @@ class FillSVG extends ComputingFunctions {
         // Remove any existing PTM triangle group to avoid duplicate rendering
         this.commons.svgContainer.select(`#c${object.id}_container`).remove();
     
+        // triangle markers
+        const triangleSize = 16;
+        const halfWidth = 4;
+        const verticalSpacing = triangleSize;
+
+        const adjustedPosition = position + triangleSize;
+        
         // Create a new group for this PTM feature
         const triangleGroup = this.commons.svgContainer.append("g")
             .attr("class", "pointPosition featureLine")
-            .attr("transform", "translate(0," + position + ")")
+            .attr("transform", "translate(0," + adjustedPosition + ")")
             .attr("id", 'c' + object.id + '_container');
     
         // Baseline
@@ -1253,11 +1255,6 @@ class FillSVG extends ComputingFunctions {
             .attr("class", "line " + object.className)
             .style("stroke", "gray")
             .style("stroke-width", "0.5px");
-    
-        // triangle markers
-        const triangleSize = 6;
-        const halfWidth = 4;
-        const verticalSpacing = triangleSize;
     
         triangleGroup.selectAll(".ptm-triangle")
             .data(object.data)

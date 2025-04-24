@@ -163,7 +163,7 @@ export class Transition extends ComputingFunctions {
             : container.selectAll(".ptm-triangle");
     
         // Triangle size parameters
-        const triangleSize = 6;
+        const triangleSize = 16;
         const halfWidth = 4;
         const verticalSpacing = triangleSize;
     
