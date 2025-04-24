@@ -278,7 +278,6 @@ class FillSVG extends ComputingFunctions {
 
         }
         else if (feature.type === "multipleRect") {
-
             this.preComputing.multipleRect(feature);
             this.multipleRect(feature, this.commons.YPosition, this.commons.level);
             this.commons.YPosition += (this.commons.level - 1) * 10;
@@ -1141,29 +1140,29 @@ class FillSVG extends ComputingFunctions {
                         
                 }
                
-                if (object.toggle == true){
-                histoG.selectAll(null) //"." + object.className + i
-                    .data([seg.points])
-                    .enter()
-                    .append("path")
-                    //.attr("clip-path", "url(#clip)") // firefox compatibility
-                    .attr("class", "element " + object.className + " " + object.className + i + " seg" + index)
-                    // d3 v4
-                    .attr("d", this.commons.lineGen.y((d) => {
-                            //return this.commons.lineYScale(-d.y) * 10 + object.shift;
-                            return this.commons.lineYScale(-d.y) * 22 + object.shift;
-                        })
-                    )
-                    //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")
-                    //.style("fill", object.color)
-                    .style("fill", object.fill ? object.color : "none") // Prevents curve from being filled
-                    .style("fill-opacity", "0.8") 
-                    // TODO: black stroke is a hot-fix for multi-line features coloring, 
-                    // Should go and change original instantiation code instead
-                    .style("stroke", seg.color || object.color[i] || 'black')
-                    .style("z-index", "3")
-                    .style("stroke-width", "2px")
-                    .call(this.commons.d3helper.tooltip(object));
+                if (object.toggle[i] == true){
+                    histoG.selectAll(null) //"." + object.className + i
+                        .data([seg.points])
+                        .enter()
+                        .append("path")
+                        //.attr("clip-path", "url(#clip)") // firefox compatibility
+                        .attr("class", "element " + object.className + " " + object.className + i + " seg" + index)
+                        // d3 v4
+                        .attr("d", this.commons.lineGen.y((d) => {
+                                //return this.commons.lineYScale(-d.y) * 10 + object.shift;
+                                return this.commons.lineYScale(-d.y) * 22 + object.shift;
+                            })
+                        )
+                        //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")
+                        //.style("fill", object.color)
+                        .style("fill", object.fill ? object.color : "none") // Prevents curve from being filled
+                        .style("fill-opacity", "0.8") 
+                        // TODO: black stroke is a hot-fix for multi-line features coloring, 
+                        // Should go and change original instantiation code instead
+                        .style("stroke", seg.color || object.color[i] || 'black')
+                        .style("z-index", "3")
+                        .style("stroke-width", "2px")
+                        .call(this.commons.d3helper.tooltip(object));
                 }
                 })
 
