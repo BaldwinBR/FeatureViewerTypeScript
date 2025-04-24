@@ -1133,7 +1133,22 @@ class FeatureViewer {
         }
 
         if (object.toggle === undefined){
-            object.toggle = true;
+            // Curve data can be either array of data 
+            // or array containing arrays of data
+            // Normalize toggle to always be an array 
+            // where length is how many lines are in the graph
+            if (object.type == "curve"){
+                if (Array.isArray(object.data[0])){
+                    object.toggle = new Array(object.data.length).fill(true)
+                }
+                else {
+                    object.toggle = new Array(1).fill(true)
+                }
+            }
+            // Non curve feature type
+            else {
+                object.toggle = true;
+            }
         }
 
         //object.height = this.commons.elementHeight;
@@ -1344,17 +1359,29 @@ class FeatureViewer {
     // Toggle Features Graphs On/Off
     public featureToggle(buttonId: string){
 
+        // Seperate ButtonID into id string and index number
+        const parts = buttonId.trim().split(/\s+/);
+        const [ID, rawIndex] = parts;
+        const index = Number(rawIndex);
+
+        // Iterate over features looking for ID match
         for (let i = 0; i < this.commons.features.length; i ++){
-            if (this.commons.features[i].id == buttonId){
+            if (this.commons.features[i].id == ID){
 
-                console.log(this.commons.features[i].toggle)
+                // Curve data contains toggle information wihin an array
+                if (Array.isArray(this.commons.features[i].toggle)){
+                    //Flip Value
+                    this.commons.features[i].toggle[index] = !this.commons.features[i].toggle[index];
+                }
+                // Not a curve type so just boolean value; Currently not used
+                else {
+                    this.commons.features[i].toggle = !this.commons.features[i].toggle;
+                }
 
-                this.commons.features[i].toggle = !this.commons.features[i].toggle;
-                    
-                    // features already in viewer? empty it before drawing
-                    this.commons.features = this.emptyFeatures()
-                    // draw the viewer
-                    this.drawFeatures()
+                // Refresh Viewer
+                this.commons.features = this.emptyFeatures()
+                this.drawFeatures()
+
             }
         }
     }
