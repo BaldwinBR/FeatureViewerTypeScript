@@ -321,15 +321,29 @@ class FillSVG extends ComputingFunctions {
 
         }
         else if (feature.type === "ptmTriangle") {
-            const triangleSize = 16;
-            const verticalSpacing = triangleSize;
-            const baseHeight = triangleSize * 5;
-            const extraHeight = (feature.maxStackSize > 5)
-                ? (feature.maxStackSize - 5) * verticalSpacing
+           
+            // Compute maximum number of stacked PTMs for dynamic panel height adjustment
+            const verticalSpacing = 16;
+            const baseHeight = verticalSpacing * 5;
+
+            const stackMap = new Map<number, number>();
+            for (const entry of feature.data) {
+                const count = stackMap.get(entry.x) || 0;
+                stackMap.set(entry.x, count + 1);
+            }
+            const maxStack = Math.max(...stackMap.values());
+            
+            // Determine if maxStack requires more height
+            const extraHeight = (maxStack > 5)
+                ? (maxStack - 5) * verticalSpacing
                 : 0;
+            
             this.commons.YPosition += baseHeight + extraHeight;
-        
+
+            // Construct Feature
             this.ptmTriangle(feature, this.commons.YPosition);
+
+
         }
     }
 
@@ -1227,16 +1241,32 @@ class FillSVG extends ComputingFunctions {
 
     // PTM TRIANGLES
     public ptmTriangle(object, position) {
+
         // Remove any existing PTM triangle group to avoid duplicate rendering
         this.commons.svgContainer.select(`#c${object.id}_container`).remove();
+
+        // TypeMap for Toggle
+        // Needs to be added to if more PTM types added
+        // Could be easily built dynamically 
+        // Would require dynamic sidebar creation to match though
+        const typeMap = {
+            0: 'Phosphorylation',
+            1: 'Glycosylation',
+            2: 'Ubiquitination',
+            3: 'SUMOylation',
+            4: 'Acetyllysine',
+            5: 'Methylation',
+            6: 'Pyrrolidone',
+            7: 'Palmitoylation',
+            8: 'Hydroxylation'
+        };
     
         // triangle markers
         const triangleSize = 16;
         const halfWidth = 4;
         const verticalSpacing = triangleSize;
-
         const adjustedPosition = position + triangleSize;
-        
+
         // Create a new group for this PTM feature
         const triangleGroup = this.commons.svgContainer.append("g")
             .attr("class", "pointPosition featureLine")
@@ -1245,7 +1275,6 @@ class FillSVG extends ComputingFunctions {
     
         // Baseline
         const dataLine = [[{ x: 1, y: 0 }, { x: this.commons.fvLength, y: 0 }]];
-        
         triangleGroup.selectAll(".line " + object.className)
             .data(dataLine)
             .enter()
@@ -1254,10 +1283,37 @@ class FillSVG extends ComputingFunctions {
             .attr("class", "line " + object.className)
             .style("stroke", "gray")
             .style("stroke-width", "0.5px");
-    
-        triangleGroup.selectAll(".ptm-triangle")
-            .data(object.data)
-            .enter()
+        
+
+        // Determines which toggle positions are flipped
+        // Tracks type of those that are flipped off
+        const hiddenTypes = new Set(
+            object.toggle
+                .map((flag, idx) => flag ? null : typeMap[idx])
+                .filter(t => t !== null)
+        );
+
+        // Bind with a key for stability 
+        const selection = triangleGroup.selectAll(".ptm-triangle")
+            .data(object.data, d => d.id);
+
+        // Remove old triangles (glitch prevention)
+        selection.exit().remove();
+
+        // Assign _stackY value for PTMs at the same position to stack them vertically
+        const stackMap = new Map<number, number>();
+        const spacing = 1;
+        for (const entry of object.data) {
+            // Ensure type is not present in hiddenType list
+            if (!hiddenTypes.has(entry.type)){ 
+                const count = stackMap.get(entry.x) ?? 0;
+                entry._stackY = spacing * count;
+                stackMap.set(entry.x, count + 1);
+            }
+        }
+
+        const enterSel = selection.enter()
+            .filter(d => !hiddenTypes.has(d.type)) // Filter out hidden types
             .append("polygon")
             .attr("class", "ptm-triangle")
             .attr("points", d => {
@@ -1272,8 +1328,10 @@ class FillSVG extends ComputingFunctions {
             .style("stroke", d => d.stroke ?? object.stroke ?? d.color)
             .style("fill-opacity", d => d.opacity ?? object.opacity ?? 1)
             .call(this.commons.d3helper.tooltip(object));
-    
-        this.forcePropagation(triangleGroup);
+
+
+        this.forcePropagation(enterSel);    
+        
     }
 
     // AXIS FUNCTIONS

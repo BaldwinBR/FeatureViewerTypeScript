@@ -1145,6 +1145,11 @@ class FeatureViewer {
                     object.toggle = new Array(1).fill(true)
                 }
             }
+            else if(object.type == "ptmTriangle"){
+                // Needs to be manually updated if more PTM types added
+                // Could also be dynamically filled if sidebar was dynamic
+                object.toggle = new Array(9).fill(true)
+            }
             // Non curve feature type
             else {
                 object.toggle = true;
