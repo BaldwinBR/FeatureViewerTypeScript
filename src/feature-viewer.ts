@@ -177,8 +177,9 @@ class FeatureViewer {
             .attr("width", this.commons.viewerOptions.margin.left)
             .attr("class", "flagBackground")
             .attr("height", "100%")
+            .attr("fill-opacity", 0)
             .attr("fill", this.commons.backgroundcolor)
-            .attr("fill-opacity", 1);
+            .attr("z-index", 1);
         this.updateYAxis();
 
     };
@@ -226,6 +227,7 @@ class FeatureViewer {
         // create polygon
         this.commons.yAxisSVGGroup
             .append("polygon") // attach a polygon
+            
             .attr("class", (d) => {
                     if (this.commons.viewerOptions.showSubFeatures && d.hasSubFeatures) {
                         return "boxshadow Arrow withsubfeatures"
@@ -304,7 +306,7 @@ class FeatureViewer {
                     cvm = 17
                 }
                 // horizontal flag placement
-                this.commons.headMargin = 0;
+                this.commons.headMargin = 20;
                 if (d.ladderLabel == null) {
                     if (d.flagLevel) {
                         this.commons.headMargin = 20 * (d.flagLevel - 1);
@@ -326,15 +328,13 @@ class FeatureViewer {
                 if (this.commons.viewerOptions.mobileMode) {
                     return this.calcFlagWidth(d);
                 } else {
-                    //let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth  // 20 + (20 * d.flagLevel) --> 0
-                    let margin = 8;
+                    let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth  // 20 + (20 * d.flagLevel) --> 0
                     return this.commons.viewerOptions.margin.left - margin; // chevron margin and text indent
                 }
             })
             .attr("height", this.commons.step)
             .html((d) => {
-                //return d.label;
-                return `<div xmlns="http://www.w3.org/1999/xhtml" style="text-align: right; width: 100%; height: 100%; overflow: hidden;">${d.label}</div>`;
+                return d.label;
             });
 
 
@@ -475,7 +475,6 @@ class FeatureViewer {
                     // apply transitions
                     this.transition_data(this.commons.features, currentShift);
                     this.fillSVG.reset_axis();
-                    this.fillSVG.reset_axisTop();
 
                     // remove sequence
 
@@ -543,8 +542,7 @@ class FeatureViewer {
                     // text width depends on mobile width, flaglevel and presence of subfeatures icon
                     return this.calcFlagWidth(d);
                 } else {
-                    //let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth   // 20 + (20 * d['flagLevel']) --> 0
-                    let margin = 8
+                    let margin = 20 + this.commons.viewerOptions.ladderSpacing * this.commons.viewerOptions.maxDepth   // 20 + (20 * d['flagLevel']) --> 0
                     return this.commons.viewerOptions.margin.left - margin; // chevron margin and text indent
                 }
             });
@@ -566,12 +564,12 @@ class FeatureViewer {
     }
 
     private calcFlagWidth(d) {
-        this.commons.headMargin = 0;  // 20 * (d.flagLevel - 1)
+        this.commons.headMargin = 20;  // 20 * (d.flagLevel - 1)
         let totalspace = 0
         if ('hasSubFeatures' in d && d.hasSubFeatures) {totalspace} // {totalspace += 20}
 
         if (this.commons.headMargin) {totalspace += this.commons.headMargin + 8}
-        let space = this.commons.viewerOptions.labelTrackWidthMobile - 8 - totalspace
+        let space = this.commons.viewerOptions.labelTrackWidthMobile - 15 - totalspace
         if (space < 20) {
             return '0px';
         } else {
@@ -654,7 +652,6 @@ class FeatureViewer {
 
             this.transition_data(this.commons.features, this.commons.current_extend.start);
             this.fillSVG.reset_axis();
-            this.fillSVG.reset_axisTop();
             this.fillSVG.resizeBrush()
 
         }
@@ -678,9 +675,6 @@ class FeatureViewer {
                 this.transition.lollipop(o);
             } else if (o.type === "curve") {
                 this.transition.lineTransition(o);
-            }
-            else if (o.type === 'ptmTriangle') {
-                this.transition.ptmTriangle(o);
             }
             // resize basal line too
             this.transition.basalLine(o);
@@ -757,17 +751,16 @@ class FeatureViewer {
                 return d['y'] + 6;
                 //return (d[0] as any).y + 6;
             });
-        /*
+
         let rtickStep = Math.round(this.commons.fvLength/10); // fraction of a tenth
         //let tickStep = Math.round(rtickStep/10)*10; // nearest 10th multiple
         let tickStep = Math.round(rtickStep/20)*10; // nearest 10th multiple
-        
+
         // TODO: add 0 and last value to array --Ben
         let tickArray = Array.from(Array(this.commons.fvLength).keys())
             .filter(function (value, index, ar) {
                 return (index % tickStep == 0 && index !== 0);
             });
-        
         /*
         let tickArray = Array.from(Array(this.commons.fvLength).keys())
         .filter((value, index) => index % tickStep == 0)
@@ -791,13 +784,7 @@ class FeatureViewer {
             // Ensures removal of non int values like 0.5
             .tickFormat(d => (Number.isInteger(d) && d !== 0) ? d.toString() : "");
 
-        //Create Axis
-        this.commons.xAxisTop = d3.axisTop(this.commons.scaling)
-            .ticks(10)
-            // Ensures removal of non int values like 0.5
-            .tickFormat(d => (Number.isInteger(d) && d !== 0) ? d.toString() : "");
-        
-            let yAxisScale = d3.scaleBand()
+        let yAxisScale = d3.scaleBand()
             //.domain([0, this.commons.yData.length])
             .rangeRound([0, 500]);
 
@@ -1075,7 +1062,6 @@ class FeatureViewer {
         }
 
         this.fillSVG.addXAxis(this.commons.YPosition);
-        this.fillSVG.addXAxisTop(this.commons.YPosition);
         this.addYAxis();
 
         if (this.commons.viewerOptions.brushActive) {
@@ -1132,30 +1118,6 @@ class FeatureViewer {
             object.color = "#DFD5F5";
         }
 
-        if (object.toggle === undefined){
-            // Curve data can be either array of data 
-            // or array containing arrays of data
-            // Normalize toggle to always be an array 
-            // where length is how many lines are in the graph
-            if (object.type == "curve"){
-                if (Array.isArray(object.data[0])){
-                    object.toggle = new Array(object.data.length).fill(true)
-                }
-                else {
-                    object.toggle = new Array(1).fill(true)
-                }
-            }
-            else if(object.type == "ptmTriangle"){
-                // Needs to be manually updated if more PTM types added
-                // Could also be dynamically filled if sidebar was dynamic
-                object.toggle = new Array(9).fill(true)
-            }
-            // Non curve feature type
-            else {
-                object.toggle = true;
-            }
-        }
-
         //object.height = this.commons.elementHeight;
         object.flagLevel = flagLevel;
 
@@ -1178,7 +1140,6 @@ class FeatureViewer {
         }
 
         this.fillSVG.updateXAxis(this.commons.YPosition);
-        this.fillSVG.updateXAxisTop(this.commons.YPosition);
         this.calculate.updateSVGHeight(this.commons.YPosition + 5);
 
         // update brush
@@ -1328,7 +1289,6 @@ class FeatureViewer {
 
         this.transition_data(this.commons.features, this.commons.viewerOptions.offset.start);
         this.fillSVG.reset_axis();
-        this.fillSVG.reset_axisTop();
 
         // Fire Event
         if (CustomEvent) {
@@ -1360,35 +1320,9 @@ class FeatureViewer {
         this.drawFeatures()
     }
 
-    
     // Toggle Features Graphs On/Off
-    public featureToggle(buttonId: string){
-
-        // Seperate ButtonID into id string and index number
-        const parts = buttonId.trim().split(/\s+/);
-        const [ID, rawIndex] = parts;
-        const index = Number(rawIndex);
-
-        // Iterate over features looking for ID match
-        for (let i = 0; i < this.commons.features.length; i ++){
-            if (this.commons.features[i].id == ID){
-
-                // Curve data contains toggle information wihin an array
-                if (Array.isArray(this.commons.features[i].toggle)){
-                    //Flip Value
-                    this.commons.features[i].toggle[index] = !this.commons.features[i].toggle[index];
-                }
-                // Not a curve type so just boolean value; Currently not used
-                else {
-                    this.commons.features[i].toggle = !this.commons.features[i].toggle;
-                }
-
-                // Refresh Viewer
-                this.commons.features = this.emptyFeatures()
-                this.drawFeatures()
-
-            }
-        }
+    public featureToggle(){
+        //this.transition.lineTransition(); 
     }
 
     public downloadSvg() {
@@ -1509,7 +1443,6 @@ class FeatureViewer {
 
         // fix axis
         this.fillSVG.updateXAxis(this.commons.step)
-        this.fillSVG.updateXAxisTop(this.commons.step)
 
         // transit svgContent
         let container = d3.select(`#${this.divId} #svgContent`);

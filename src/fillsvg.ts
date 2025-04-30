@@ -278,6 +278,7 @@ class FillSVG extends ComputingFunctions {
 
         }
         else if (feature.type === "multipleRect") {
+
             this.preComputing.multipleRect(feature);
             this.multipleRect(feature, this.commons.YPosition, this.commons.level);
             this.commons.YPosition += (this.commons.level - 1) * 10;
@@ -296,7 +297,7 @@ class FillSVG extends ComputingFunctions {
         else if (feature.type === "curve") {
 
             // this type of object overwrites object data, after fillSVG go back to original
-            this.storeData = JSON.parse(JSON.stringify(feature.data));
+            this.storeData = feature.data;
             if (!(Array.isArray(feature.data[0]))) feature.data = [feature.data];
             if (!(Array.isArray(feature.color))) feature.color = [feature.color];
             let negativeNumbers = false;
@@ -309,40 +310,17 @@ class FillSVG extends ComputingFunctions {
 
             this.preComputing.preComputingLine(feature);
 
+            this.addYAxisForLine(this.commons.YPosition);
+
             this.fillSVGLine(feature, this.commons.YPosition);
             feature.data = this.storeData;
-            this.commons.YPosition += this.commons.step // feature.pathLevel; // 7
+            this.commons.YPosition += this.commons.step+50 // feature.pathLevel; // 7
             // this.commons.YPosition += negativeNumbers ? feature.pathLevel - 5 : 0;
 
         }
         else if (feature.type === "lollipop") {
             this.commons.YPosition += 7;
             this.lollipop(feature, this.commons.YPosition);
-
-        }
-        else if (feature.type === "ptmTriangle") {
-           
-            // Compute maximum number of stacked PTMs for dynamic panel height adjustment
-            const verticalSpacing = 16;
-            const baseHeight = verticalSpacing * 5;
-
-            const stackMap = new Map<number, number>();
-            for (const entry of feature.data) {
-                const count = stackMap.get(entry.x) || 0;
-                stackMap.set(entry.x, count + 1);
-            }
-            const maxStack = Math.max(...stackMap.values());
-            
-            // Determine if maxStack requires more height
-            const extraHeight = (maxStack > 5)
-                ? (maxStack - 5) * verticalSpacing
-                : 0;
-            
-            this.commons.YPosition += baseHeight + extraHeight;
-
-            // Construct Feature
-            this.ptmTriangle(feature, this.commons.YPosition);
-
 
         }
     }
@@ -366,7 +344,7 @@ class FillSVG extends ComputingFunctions {
         // ad areas in any case
         if (object.sidebar) {
 
-            // Buttons within same sidebar object are stacked with this offset
+            // Buttons within same sidbar object are stacked with this offset
             // iterated at bottom of loop 
             let multiButtonSpacing = 0; 
 
@@ -998,7 +976,7 @@ class FillSVG extends ComputingFunctions {
             // necessary id to get height when placing tags
             .attr("id", () => {return 'c' + object.id + '_container'})
             .attr("class", "lining featureLine")
-            .attr("transform", "translate(0," + position + ")")
+            .attr("transform", "translate(0," + (position+25) + ")")
             .attr("heigth", object.curveHeight);
 
         // Line graphs are made up of segments, 
@@ -1011,7 +989,6 @@ class FillSVG extends ComputingFunctions {
                 y: number;
                 description: string;
                 tooltip: string;
-                color: string; // preserve color data in point for tooltips
             }
 
             interface Segment {
@@ -1030,7 +1007,6 @@ class FillSVG extends ComputingFunctions {
                     y: line[0].y,
                     description: line[0].description,
                     tooltip: line[0].tooltip,
-                    color: line[0].color
                 }]
             };
             
@@ -1066,7 +1042,6 @@ class FillSVG extends ComputingFunctions {
                         y: point.y,
                         description: point.description,
                         tooltip: point.tooltip,
-                        color: point.color
                     })
                 } else {
                     // New color encountered, add currentSegment and start a new
@@ -1081,7 +1056,6 @@ class FillSVG extends ComputingFunctions {
                             y: point.y,
                             description: point.description,
                             tooltip: point.tooltip,
-                            color: point.color
                         }]
                     };
                 }
@@ -1148,31 +1122,30 @@ class FillSVG extends ComputingFunctions {
                     }
                         
                 }
-               
-                if (object.toggle[i] == true){
-                    histoG.selectAll(null) //"." + object.className + i
-                        .data([seg.points])
-                        .enter()
-                        .append("path")
-                        //.attr("clip-path", "url(#clip)") // firefox compatibility
-                        .attr("class", "element " + object.className + " " + object.className + i + " seg" + index)
-                        // d3 v4
-                        .attr("d", this.commons.lineGen.y((d) => {
-                                //return this.commons.lineYScale(-d.y) * 10 + object.shift;
-                                return this.commons.lineYScale(-d.y) * 22 + object.shift;
-                            })
-                        )
-                        //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")
-                        //.style("fill", object.color)
-                        .style("fill", object.fill ? object.color : "none") // Prevents curve from being filled
-                        .style("fill-opacity", "0.8") 
-                        // TODO: black stroke is a hot-fix for multi-line features coloring, 
-                        // Should go and change original instantiation code instead
-                        .style("stroke", seg.color || object.color[i] || 'black')
-                        .style("z-index", "3")
-                        .style("stroke-width", "2px")
-                        .call(this.commons.d3helper.tooltip(object));
-                }
+                
+                histoG.selectAll(null) //"." + object.className + i
+                    .data([seg.points])
+                    .enter()
+                    .append("path")
+                    //.attr("clip-path", "url(#clip)") // firefox compatibility
+                    .attr("class", "element " + object.className + " " + object.className + i + " seg" + index)
+                    // d3 v4
+                    .attr("d", this.commons.lineGen.y((d) => {
+                            //return this.commons.lineYScale(-d.y) * 10 + object.shift;
+                            return this.commons.lineYScale(-d.y) * 22 + object.shift;
+                        })
+                    )
+                    //.style("fill", object.fill ? this.shadeBlendConvert(0.6, object.color[i]) || this.shadeBlendConvert(0.6, "#000") : "none")
+                    //.style("fill", object.color)
+                    .style("fill", object.fill ? object.color : "none") // Prevents curve from being filled
+                    .style("fill-opacity", "0.8") 
+                    // TODO: black stroke is a hot-fix for multi-line features coloring, 
+                    // Should go and change original instantiation code instead
+                    .style("stroke", seg.color || object.color[i] || 'black')
+                    .style("z-index", "3")
+                    .style("stroke-width", "2px")
+                    .call(this.commons.d3helper.tooltip(object));
+
                 })
 
         });
@@ -1237,101 +1210,6 @@ class FillSVG extends ComputingFunctions {
             .call(this.commons.d3helper.tooltip(object));
 
         this.forcePropagation(rects);
-    } 
-
-    // PTM TRIANGLES
-    public ptmTriangle(object, position) {
-
-        // Remove any existing PTM triangle group to avoid duplicate rendering
-        this.commons.svgContainer.select(`#c${object.id}_container`).remove();
-
-        // TypeMap for Toggle
-        // Needs to be added to if more PTM types added
-        // Could be easily built dynamically 
-        // Would require dynamic sidebar creation to match though
-        const typeMap = {
-            0: 'Phosphorylation',
-            1: 'Glycosylation',
-            2: 'Ubiquitination',
-            3: 'SUMOylation',
-            4: 'Acetyllysine',
-            5: 'Methylation',
-            6: 'Pyrrolidone',
-            7: 'Palmitoylation',
-            8: 'Hydroxylation'
-        };
-    
-        // triangle markers
-        const triangleSize = 16;
-        const halfWidth = 4;
-        const verticalSpacing = triangleSize;
-        const adjustedPosition = position + triangleSize;
-
-        // Create a new group for this PTM feature
-        const triangleGroup = this.commons.svgContainer.append("g")
-            .attr("class", "pointPosition featureLine")
-            .attr("transform", "translate(0," + adjustedPosition + ")")
-            .attr("id", 'c' + object.id + '_container');
-    
-        // Baseline
-        const dataLine = [[{ x: 1, y: 0 }, { x: this.commons.fvLength, y: 0 }]];
-        triangleGroup.selectAll(".line " + object.className)
-            .data(dataLine)
-            .enter()
-            .append("path")
-            .attr("d", this.commons.line)
-            .attr("class", "line " + object.className)
-            .style("stroke", "gray")
-            .style("stroke-width", "0.5px");
-        
-
-        // Determines which toggle positions are flipped
-        // Tracks type of those that are flipped off
-        const hiddenTypes = new Set(
-            object.toggle
-                .map((flag, idx) => flag ? null : typeMap[idx])
-                .filter(t => t !== null)
-        );
-
-        // Bind with a key for stability 
-        const selection = triangleGroup.selectAll(".ptm-triangle")
-            .data(object.data, d => d.id);
-
-        // Remove old triangles (glitch prevention)
-        selection.exit().remove();
-
-        // Assign _stackY value for PTMs at the same position to stack them vertically
-        const stackMap = new Map<number, number>();
-        const spacing = 1;
-        for (const entry of object.data) {
-            // Ensure type is not present in hiddenType list
-            if (!hiddenTypes.has(entry.type)){ 
-                const count = stackMap.get(entry.x) ?? 0;
-                entry._stackY = spacing * count;
-                stackMap.set(entry.x, count + 1);
-            }
-        }
-
-        const enterSel = selection.enter()
-            .filter(d => !hiddenTypes.has(d.type)) // Filter out hidden types
-            .append("polygon")
-            .attr("class", "ptm-triangle")
-            .attr("points", d => {
-                const cx = this.commons.scaling(d.x);
-                const cy = -d._stackY * verticalSpacing;
-                const tip = [cx, cy];
-                const left = [cx - halfWidth, cy - triangleSize];
-                const right = [cx + halfWidth, cy - triangleSize];
-                return `${tip.join(',')} ${left.join(',')} ${right.join(',')}`;
-            })
-            .style("fill", d => d.color || object.color)
-            .style("stroke", d => d.stroke ?? object.stroke ?? d.color)
-            .style("fill-opacity", d => d.opacity ?? object.opacity ?? 1)
-            .call(this.commons.d3helper.tooltip(object));
-
-
-        this.forcePropagation(enterSel);    
-        
     }
 
     // AXIS FUNCTIONS
@@ -1340,13 +1218,13 @@ class FillSVG extends ComputingFunctions {
             this.commons.svgContainer.transition().duration(500);
         }
         this.commons.svgContainer
-            .select(".XAxisBottom")
+            .select(".x.axis")
             .call(this.commons.xAxis);
     }
 
     public addXAxis(position) {
         this.commons.svgContainer.append("g")
-            .attr("class", "x axis XAxisBottom")
+            .attr("class", "x axis XAxis")
             .attr("transform", "translate(0," + (position + 20) + ")")
             .call(this.commons.xAxis);
         if (!this.commons.viewerOptions.showAxis) {
@@ -1355,38 +1233,34 @@ class FillSVG extends ComputingFunctions {
         }
     };
 
-    public updateXAxis(position) {
-        this.commons.svgContainer.selectAll(".XAxisBottom")
-            .attr("transform", "translate(0," + (position + this.commons.step) + ")");
-    };
+    private addYAxisForLine(yPosition: number) {
+        const yScale = d3.scaleLinear()
+            .domain([0, 1])
+            .range([75, 15]); 
+
+        const yAxis = d3.axisLeft(yScale)
+            .tickValues([0, 0.5, 1])
+            .tickSize(4);
     
-    // AXIS Top FUNCTIONS
-    public reset_axisTop() {
-        if (this.commons.animation) {
-            this.commons.svgContainer.transition().duration(500);
-        }
-        this.commons.svgContainer
-            .select(".XAxisTop")
-            .call(this.commons.xAxisTop);
+            const yAxisGroup = this.commons.svgContainer.append("g")
+            .attr("class", "y-axis-line")
+            .attr("transform", `translate(-5, ${yPosition})`)
+            .call(yAxis);
+    
+        yAxisGroup.selectAll("text")
+            .style("font-size", "8px")
+            .style("fill", "#000");
+    
+        yAxisGroup.selectAll("path, line")
+            .style("stroke", "000")
+            .style("stroke-height","1")
+            .style("stroke-width", "1");
     }
 
-    public addXAxisTop(position) {
-        this.commons.svgContainer.append("g")
-            .attr("class", "x axis XAxisTop")
-            .attr("transform", "translate(0," + (position + 20) + ")")
-            .call(this.commons.xAxisTop);
-        if (!this.commons.viewerOptions.showAxis) {
-            d3.select(`#${this.commons.divId}`).selectAll(".tick")
-                .attr("display", "none")
-        }
+    public updateXAxis(position) {
+        this.commons.svgContainer.selectAll(".XAxis")
+            .attr("transform", "translate(0," + (position + this.commons.step) + ")");
     };
-
-    public updateXAxisTop(position) {
-        this.commons.svgContainer.selectAll(".XAxisTop")
-            .attr("transform", "translate(0," + (this.commons.step - this.commons.elementHeight) + ")");
-            //.attr("transform", "translate(0," + (position + this.commons.step - 1210) + ")");
-    };
-
 
     // BRUSH FUNCTION
 
