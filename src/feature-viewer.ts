@@ -919,7 +919,7 @@ class FeatureViewer {
                     .text("1");
             }
 
-            // help
+            // help buttons (top of page)
             if (!document.querySelector(div + ' .header-help')) {
 
                 let headerHelp = headerOptions
@@ -939,7 +939,22 @@ class FeatureViewer {
                     .attr("class", "helperButton")
                     .append("path")
                     .attr("d", "M13 8v-6h-6v6h-5l8 8 8-8h-5zM0 18h20v2h-20v-2z")
-
+                
+                headerHelp
+                    .append("button")
+                    .attr("class", "mybuttoncircle")
+                    .attr("id", "refreshButton")
+                    .on("click", () => {
+                        this.resetAll();
+                    })
+                    // draw icon
+                    .append("svg")
+                    .attr("class", "helperButton")
+                    .attr("viewBox", "0 0 512 512")
+                    .append("path")
+                    .attr("d", "M64,256H34A222,222,0,0,1,430,118.15V85h30V190H355V160h67.27A192.21,192.21,0,0,0,256,64C150.13,64,64,150.13,64,256Zm384,0c0,105.87-86.13,192-192,192A192.21,192.21,0,0,1,89.73,352H157V322H52V427H82V393.85A222,222,0,0,0,478,256Z")
+                    .attr("stroke", "dimgray")
+                    .attr("stroke-width", 20)
 
                 headerHelp
                     .append("button")
@@ -953,9 +968,7 @@ class FeatureViewer {
                     .attr("class", "helperButton")
                     .append("path")
                     .attr("d", "M2.93 17.070c-1.884-1.821-3.053-4.37-3.053-7.193 0-5.523 4.477-10 10-10 2.823 0 5.372 1.169 7.19 3.050l0.003 0.003c1.737 1.796 2.807 4.247 2.807 6.947 0 5.523-4.477 10-10 10-2.7 0-5.151-1.070-6.95-2.81l0.003 0.003zM9 11v4h2v-6h-2v2zM9 5v2h2v-2h-2z")
-
-            }
-
+            }              
         }
 
         this.commons.svg = d3.select(div).append("svg")
@@ -1131,29 +1144,9 @@ class FeatureViewer {
         if (!object.color) {
             object.color = "#DFD5F5";
         }
-
+        
         if (object.toggle === undefined){
-            // Curve data can be either array of data 
-            // or array containing arrays of data
-            // Normalize toggle to always be an array 
-            // where length is how many lines are in the graph
-            if (object.type == "curve"){
-                if (Array.isArray(object.data[0])){
-                    object.toggle = new Array(object.data.length).fill(true)
-                }
-                else {
-                    object.toggle = new Array(1).fill(true)
-                }
-            }
-            else if(object.type == "ptmTriangle"){
-                // Needs to be manually updated if more PTM types added
-                // Could also be dynamically filled if sidebar was dynamic
-                object.toggle = new Array(9).fill(true)
-            }
-            // Non curve feature type
-            else {
-                object.toggle = true;
-            }
+            this.calculate.initToggle(object)
         }
 
         //object.height = this.commons.elementHeight;
@@ -1353,13 +1346,22 @@ class FeatureViewer {
         this.resetHighlight()
         this.resetZoom()
 
+        // empty features and replace data
         this.emptyFeatures()
-        // empty features
         this.commons.features = this.commons.viewerOptions.backup.features;
+
+        // Change all toggles to true
+        this.resetAllToggles()
+
         // redraw features
         this.drawFeatures()
     }
 
+    // Public wrapper of calcuate method
+    public resetAllToggles(){
+
+        this.calculate.updateToggles()
+    }
     
     // Toggle Features Graphs On/Off
     public featureToggle(buttonId: string){
@@ -1386,6 +1388,10 @@ class FeatureViewer {
                 // Refresh Viewer
                 this.commons.features = this.emptyFeatures()
                 this.drawFeatures()
+                // Restore scroll
+                if (this.commons.sidebarElements) {
+                    this.commons.sidebarElements.node().scrollTop = this.commons.scrollTop;
+                }
 
             }
         }
@@ -1491,11 +1497,20 @@ class FeatureViewer {
 
     public emptyFeatures() {
 
+        // Store sidebar scroll position
+        this.commons.scrollTop = 0;
+        if (this.commons.sidebarElements) {
+             this.commons.scrollTop = this.commons.sidebarElements.node().scrollTop;
+        }
+
         // clean feature object
         let deepCopy = JSON.parse(JSON.stringify(this.commons.features))
         for (const ft of this.commons.features) {
             this.recursivelyRemove(ft)
         }
+
+        //Remove storage of sidebar elements
+        this.commons.sidebarElements = null;
 
         function checkSequence(ft) {
             return ft.id === 'fv_sequence';
@@ -1806,6 +1821,7 @@ class FeatureViewer {
 
         // draw the viewer
         this.drawFeatures()
+    
 
     }
 

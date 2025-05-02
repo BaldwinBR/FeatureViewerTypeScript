@@ -162,6 +162,56 @@ class Calculate {
         this.commons.svg.select("clipPath rect").attr("height", position + 60 + "px");
     };
 
+    // Instantiates toggle for given object
+    public initToggle(object){
+        // Curve data can be either array of data 
+        // or array containing arrays of data
+        // Normalize toggle to always be an array 
+        // where length is how many lines are in the graph
+        if (object.type == "curve"){
+            if (Array.isArray(object.data[0])){
+                object.toggle = new Array(object.data.length).fill(true)
+            }
+            else {
+                object.toggle = new Array(1).fill(true)
+            }
+        }
+        // Needs to be manually updated if more PTM types added
+        // Could also be dynamically filled if sidebar was dynamic
+        else if(object.type == "ptmTriangle"){
+            object.toggle = new Array(9).fill(true) // 9 is current number of ptm types
+        }
+        // Non curve or PTM feature type
+        else {
+            object.toggle = true;
+        }
+    }
+    
+    // Sets all existing toggles to true
+    public updateToggles(){
+
+        for (const feature of this.commons.features) {
+            if (feature.type === "curve") {
+                if (Array.isArray(feature.data[0])) {
+                    feature.toggle = new Array(feature.data.length).fill(true);
+                } else {
+                    feature.toggle = new Array(1).fill(true)
+                }
+            }
+
+            else if (feature.type === "ptmTriangle") {
+                // Replace with new array of 9 `true` values
+                feature.toggle = new Array(9).fill(true);
+            }
+
+            else {
+                // Non-array toggle, just set to true
+                feature.toggle = true;
+            }
+        }   
+    }
+         
+
     constructor(commons: {}) {
         this.commons = commons;
     }
