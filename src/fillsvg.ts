@@ -1327,8 +1327,12 @@ class FillSVG extends ComputingFunctions {
             .style("fill", d => d.color || object.color)
             .style("stroke", d => d.stroke ?? object.stroke ?? d.color)
             .style("fill-opacity", d => d.opacity ?? object.opacity ?? 1)
-            .call(this.commons.d3helper.tooltip(object));
-
+            .call(this.commons.d3helper.tooltip({
+                type: "ptmTriangle",
+                data: object.data,
+                ptmTooltip: true,
+            }));
+            
 
         this.forcePropagation(enterSel);    
         

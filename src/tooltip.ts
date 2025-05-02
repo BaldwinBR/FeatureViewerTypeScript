@@ -99,6 +99,25 @@ class Tool extends Calculate {
 
         return elemHover;
     };
+
+    private ptmUpdateLineTooltip(mouse, pD, scalingFunction, labelTrackWidth) {
+        let xP = mouse - labelTrackWidth;
+        let elemHover = null;
+        let minDist = Infinity;
+    
+        for (let i = 0; i < pD.length; i++) {
+            let ptmX = scalingFunction(pD[i].x);
+            let dist = Math.abs(xP - ptmX);
+    
+            if (dist < minDist && dist < 6) {
+                minDist = dist;
+                elemHover = pD[i];
+            }
+        }
+    
+        return elemHover;
+    }
+    
     
 
     private clickTagFunction(d) {
@@ -342,17 +361,19 @@ class Tool extends Calculate {
                             this.commons.viewerOptions.labelTrackWidth,
                         );
 
-                        // unavailable data
+
+                        let sequence = this.commons.stringSequence;
+                        
+                        
+                        if (elemHover && elemHover.x !== undefined && elemHover.color) {
+                            // unavailable data
                         if (elemHover.color == "#c0c0c0") {
                             return `
                             <p style="margin:2px;font-weight:700;">${"Unavailable"}</p>
                         `;
                         }
 
-                        let sequence = this.commons.stringSequence;
-                        
-                        
-                        if (elemHover) {
+
                             // Line segments are connected with fake midpoints for fluid visuals
                             // Those fake midpoints can have x values of 0.5
                             // Which should not be displayed by the tooltip
@@ -460,6 +481,9 @@ class Tool extends Calculate {
                                 `;
                                 }
                             }
+                        } }
+                        // Default formatting for curves
+                        if (elemHover && elemHover.x !== undefined) {
                             // PREDICTED DISORDERED SCORE
                             if (object.flag == 6) {
                                     return `
@@ -492,13 +516,10 @@ class Tool extends Calculate {
                                 <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
                             `;
                             }
-                            // Default formatting for curves
-                            return `
-                                <p style="margin:2px;font-weight:700;">${object.label || "Data"}</p>
-                                <p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>
-                                <p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>
-                            `;
-                        } }
+                        }
+
+
+
                     } else if (object.type === "rect") {
                         // unavailable data
                         if (pD.color == "#c0c0c0") {
@@ -665,7 +686,18 @@ class Tool extends Calculate {
                             <p style="margin:2px;font-weight:700;">${object.title || "Button"}</p>
                         `;
                     }
-                    
+                    else if (object.type === "ptmTriangle" && d3.event?.target?.__data__) {
+                        // Get position of current PTM
+                        const hoveredPTM = d3.event?.target?.__data__;
+                        const x = hoveredPTM.x;
+                        const sequence = this.commons.stringSequence;
+                        
+                        return `
+                            <p style="margin:2px;font-weight:700;">${hoveredPTM.type}</p>
+                            <p style="margin:2px;">Position: ${x}${sequence?.[x]}</p>
+                        `;
+                    }
+                                   
                     // Fallback for any other type
                     return null;
                 }
