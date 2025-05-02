@@ -379,7 +379,7 @@ class FillSVG extends ComputingFunctions {
                 .attr('x', 0)
                 .attr('y', 0)
                 .attr('width', this.commons.viewerOptions.tagsTrackWidth)
-                .attr('height', '90%')
+                .attr('height', '80%')
                 .append('xhtml:div')
                 .style('max-height', '100%')
                 .style('overflow-y', 'auto')
