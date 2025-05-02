@@ -347,49 +347,78 @@ class FillSVG extends ComputingFunctions {
         }
     }
 
+    /**
+     * Refactored to support scrollbars for legend content.
+     *
+     * The original implementation created multiple SVG elements and appended them
+     * directly to a parent SVG, which prevented scrollable behavior when the content
+     * overflowed the view.
+     *
+     * To avoid rewriting large parts of the library, this version combines all legend
+     * elements into a single svg group. That group is then wrapped in styled HTML/CSS containers
+     * to enable vertical scrolling.
+     */
     public tagArea(object, thisYPosition) {
+          
+        // Starts sidebar further up than first feature
+        let tagAreaYOffset = -this.commons.step - 10; 
 
-        // Allows for sidbar to start at sequence level instead of next to first feature
-        let tagAreaYOffset = -this.commons.step - 5;
-
-        // var threeArray = [showDisorderContentTag, showViewerTag, showLinkTag];
-
-        // adjust height not triangle
-        if (object.type !== 'rect') {thisYPosition -= 5}
-
+        // Legacy code from original implementation
+        // Still makes tag area for each features sidebar
+        // Tag areas are empty other that first one contatining all objects
         let id = 't' + object.id + "_tagarea";
         let featureArea = this.commons.tagsContainer.append("g")
             .attr("class", "tagGroup")
             .attr("id", id)
             .attr("transform", "translate(0," + (thisYPosition + tagAreaYOffset) + ")");
 
-        // ad areas in any case
+        // Ensure there's one large sidebar container
+        if (!this.commons.sidebarElements) {
+            this.commons.sidebarElements= featureArea
+                .append('foreignObject')
+                .attr('x', 0)
+                .attr('y', 0)
+                .attr('width', this.commons.viewerOptions.tagsTrackWidth)
+                .attr('height', '90%')
+                .append('xhtml:div')
+                .style('max-height', '100%')
+                .style('overflow-y', 'auto')
+                .style('overflow-x', 'hidden')
+                .style('position', 'relative')
+                .style('display', 'flex')
+                .style('flex-direction', 'column')
+                .style('flex-grow', '1')
+                .style('min-height', '100px')
+                .attr('id', 'mergedSidebarContainer')
+        }
+
+        let scrollableGroup = this.commons.sidebarElements;
+
+        // Check if object.sidebar exists before proceeding
         if (object.sidebar) {
-
-            // Buttons within same sidebar object are stacked with this offset
-            // iterated at bottom of loop 
-            let multiButtonSpacing = 0; 
-
-            let objectPos = 0;
-            // check type and add html elements accordingly
+            // Check type and add html elements accordingly
             for (const bt of object.sidebar) {
+                
+                // Legacy Code
+                // Not fully tested but updated to reflect tagArea Logic Changes
+                // Recommend bt.content approach
                 if (bt.type) {
                     if (bt.type !== "button" && bt.type !== "percentage" && bt.type !== "link" && bt.type !== "icon") {
                         this.commons.logger.error("Unknown type of button", {method:'addFeatures',fvId:this.commons.divId,featureId:object.id,buttonId:bt.buttonId})
                     } else {
 
-                        let gButton = featureArea
-                            .append('g')
+                        let gButton = scrollableGroup
+                            .append('div')  // changed from SVG <g> to HTML <div>
                             .attr("id", id + '_button_' + bt.id)
-                            .attr("transform", "translate(" + objectPos + ",0)")
-                            .data([{
+                            .style("margin-bottom", "0px") // SPACING BETWEEN SIDEBAR ELEMENTS
+                            .datum({
                                 label: object.label,
                                 featureId: object.id,
                                 data: object,
                                 type: "button",
                                 id: bt.id,
                                 tooltip: bt.tooltip
-                            }]);
+                            });
 
                         let content;
                         if (bt.type == "button") {
@@ -414,73 +443,44 @@ class FillSVG extends ComputingFunctions {
                             content = `<button class="mybutton" id="${bt.id}"><svg class="helperButton"><path d="${bt.label}"></path></svg></button>`
                         }
 
+                        // Set the HTML content directly
                         gButton
-                            .append('foreignObject') // foreignObject can be styled with no limitation by user
-                            .attr("width", "100%")
-                            .attr("height", "100%")
-                            .attr("y",-6)
                             .html(content)
+                            .call(this.commons.d3helper.genericTooltip(bt));
 
                         if (bt.type !== "percentage") {
                             gButton.call(this.commons.d3helper.genericTooltip(bt));
                         }
 
-                        // update object position
-                        objectPos += (<HTMLElement>d3.select('#'+bt.id).node()).getBoundingClientRect().width + 3;
-
                     }
                 }
+                // Legend uses this 
+                // Content defined in feature declaration
                 else if (bt.content) {
 
-                    let gHtml = featureArea
-                        .append('g')
+                    let gHtml = scrollableGroup
+                        .append('div')
                         .attr("id", id + '_button_' + bt.id)
-                        .attr("transform", "translate(" + (objectPos + 3) + ","+ multiButtonSpacing +")")
-                        .data([{
+                        .style("margin-bottom", "0px") // SPACING BETWEEN SIDEBAR ELEMENTS
+                        .datum({
                             label: object.label,
                             featureId: object.id,
                             data: object,
                             type: "button",
                             id: bt.id
-                        }]);
-
+                        });
                     gHtml
-                        .append('foreignObject')
-                        .attr("y", -6)
-                        .attr("width", "100%")
-                        .attr("height", "100%")
-                        .attr("height", "100%")
-                        .append('xhtml:body')
-                        .style("margin", "0")
-                        .attr("id", bt.id)
                         .html(bt.content)
                         .call(this.commons.d3helper.genericTooltip(bt));
 
-                    // objectPos += 50;
-                    // get width of the drawn object
-                    /*
-                    try {
-                        let contentwidth = 0;
-                        if (bt.width)
-                            contentwidth = bt.width;
-                        else
-                            contentwidth = (<HTMLElement>d3.select(`#${bt.id}`).select('*').node()).getBoundingClientRect().width
-                        objectPos += contentwidth + 5;
-                    } catch (e) {
-                        objectPos += 100;
-                    }
-                        */
-
                 } else {
-                    this.commons.logger.error("Neither html content nor type of button is specified", {method:'addFeatures',fvId:this.commons.divId,featureId:object.id,buttonId:bt.buttonId})
+                    this.commons.logger.error("Neither html content nor type of button is specified", {method:'addFeatures',fvId:this.commons.divId,featureId:object.id,buttonId:bt.buttonId});
                 }
-
-                multiButtonSpacing += 20;
             }
-
-
         }
     }
+
+
 
     public sequence(seq, start = 0) {
         // remove eventual sequence still there (in transitions)

@@ -74,6 +74,8 @@ class Commons {
     public svg: any;
     public svgContainer: any;
     public tagsContainer: any;
+    public sidebarElements: any;
+    public scrollTop: any;
     public tooltipDiv: any;
     public customTooltipDiv: any;
     public divId: string;
