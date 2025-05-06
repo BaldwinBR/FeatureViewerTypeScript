@@ -991,9 +991,23 @@ class FillSVG extends ComputingFunctions {
 
     public fillSVGLine(object, position = 0) {
 
-        // if (!object.interpolation) object.interpolation = "curveBasis"; // TODO: not sensitive to interpolation now
+        interface Point {
+            x: number;
+            y: number;
+            description: string;
+            tooltip: string;
+            color: string; // preserve color data in point for tooltips
+        }
+
+        interface Segment {
+            color: string;
+            points: Array<Point>;
+        }
         
-        if (object.fill === undefined) object.fill = false; //Curves being used as lines; no need to fill
+        if (object.fill === undefined){ 
+            object.fill = false; //Curves being used as lines; no need to fill
+        }
+
         let histoG = this.commons.svgContainer.append("g")
             // necessary id to get height when placing tags
             .attr("id", () => {return 'c' + object.id + '_container'})
@@ -1005,19 +1019,6 @@ class FillSVG extends ComputingFunctions {
         // constructed from points of the same color,
         // that appear in succession
         object.data.forEach((dd, i) => {
-
-            interface Point {
-                x: number;
-                y: number;
-                description: string;
-                tooltip: string;
-                color: string; // preserve color data in point for tooltips
-            }
-
-            interface Segment {
-                color: string;
-                points: Array<Point>;
-            }
 
             let line = dd[0];
             let segments: Array<Segment> = [];
@@ -1034,15 +1035,16 @@ class FillSVG extends ComputingFunctions {
                 }]
             };
             
-            for (let i  = 0; i < line.length; i++){
+            // Start at index 1 since first point was used to initialize the current segment
+            for (let i  = 1; i < line.length; i++){
+
                 let point = line[i];
 
-                // If the current point has y === -1
-                // start a new segment
+                // If the current point is -1, start a new segment
                 if (point.y === -1) {
 
                     // Push the current segment only if it's not empty
-                    // Special case Catch: Skip pushing if it's the first segment and has a length of 1 with a value of -1
+                    // Handle special case: skip if this is the first segment and its only value is -1
                     if (currentSegment.points.length > 0 && i != 1) {
                         segments.push(currentSegment);
                     }
@@ -1056,7 +1058,6 @@ class FillSVG extends ComputingFunctions {
                     // Immediately start a new segment without pushing the -1 segment
                     continue;
                 }
-
 
                 // Color of current point matches the currentSegment's line color,
                 // keep growing the segment
@@ -1147,8 +1148,7 @@ class FillSVG extends ComputingFunctions {
                         segments[index + 1].points.unshift(midPoint);
                     }
                         
-                }
-               
+                }               
                 if (object.toggle[i] == true){
                     histoG.selectAll(null) //"." + object.className + i
                         .data([seg.points])
