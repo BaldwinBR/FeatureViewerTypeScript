@@ -233,9 +233,6 @@ class FeatureViewer {
                         return "boxshadow Arrow"
                     }
             })
-            .style("stroke", (d) => {
-                    return d.flagColor ? d.flagColor : this.commons.viewerOptions.flagColor;
-            }) // colour the border if selected
             .attr("points", (d) => {
                 if (d.ladderLabel == null) {
                     // match points with subFeature level
@@ -249,7 +246,8 @@ class FeatureViewer {
             })
             .style("fill", (d) => {
                     return d.flagColor ? d.flagColor : this.commons.viewerOptions.flagColor;
-            });
+            })
+            .style("fill-opacity", 0);
 
         // foreingObject for chevron
 
