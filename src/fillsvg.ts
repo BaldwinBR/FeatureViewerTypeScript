@@ -1467,11 +1467,17 @@ class FillSVG extends ComputingFunctions {
 
     public showHelp() {
 
-        /*let helpContent = "<div><strong>To zoom in :</strong> Left click to select area of interest</div>" +
-            "<div><strong>To zoom out :</strong> Right click to reset the scale</div>" +
-            "<div><strong>Zoom max  :</strong> Limited to <strong>" + this.commons.zoomMax.toString() + " " + this.commons.viewerOptions.unit + "</strong></div>";*/
+        /*
         let helpContent = "To zoom in : Left click to select area of interest\n To zoom out : Right click to reset the scale\n Zoom max : Limited to " +
             this.commons.viewerOptions.zoomMax.toString();
+        */
+       
+        let helpContent = 
+            "To zoom in : Left click to select area of interest\n" +
+            "To zoom out : Right click to reset the scale\n" +
+            "Zoom max : Limited to " + this.commons.viewerOptions.zoomMax.toString() + "\n" + "\n" +
+            "Legend : Click on line labels to toggle them on/off";
+
 
         alert(helpContent)
     }
