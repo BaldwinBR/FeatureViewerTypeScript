@@ -62,7 +62,6 @@ class PreComputing {
                 object.data[i].unshift({
                     x: object.data[i][0].x - 1,
                     // Temp Solution; Line still extends too far
-                    // TODO: Fix
                     y: object.data[i][0].y,
                     color: object.data[i][0].color //extends color of first segment
                 })
@@ -410,7 +409,16 @@ class FillSVG extends ComputingFunctions {
                             <span style="display: inline-block; width: 5px; height: 5px; background-color: black; border-radius: 50%; margin-right: 12px;"></span>
                             Sequence
                         </button>`
-                }
+                },
+                {
+                    id: 'Unavailable_Button',
+                    label: 'Unavailable Button',
+                    content: `
+                        <button class="btn" style="background-color: transparent; border: none; padding: 5px 10px; cursor: pointer; outline: none;">
+                            <span style="display: inline-block; width: 10px; height: 10px; background-color: #c0c0c0; margin-right: 5px;"></span>
+                            Unavaliable Data
+                        </button>`
+                 }     
             ];
 
             for (const item of defaultItems) {

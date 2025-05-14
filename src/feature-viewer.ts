@@ -757,33 +757,6 @@ class FeatureViewer {
                 return d['y'] + 6;
                 //return (d[0] as any).y + 6;
             });
-        /*
-        let rtickStep = Math.round(this.commons.fvLength/10); // fraction of a tenth
-        //let tickStep = Math.round(rtickStep/10)*10; // nearest 10th multiple
-        let tickStep = Math.round(rtickStep/20)*10; // nearest 10th multiple
-        
-        // TODO: add 0 and last value to array --Ben
-        let tickArray = Array.from(Array(this.commons.fvLength).keys())
-            .filter(function (value, index, ar) {
-                return (index % tickStep == 0 && index !== 0);
-            });
-        
-        /*
-        let tickArray = Array.from(Array(this.commons.fvLength).keys())
-        .filter((value, index) => index % tickStep == 0)
-    
-        // Ensure 0 and the last index are included
-        if (!tickArray.includes(0)) tickArray.unshift(0);
-        if (!tickArray.includes(this.commons.fvLength - 1)) tickArray.push(this.commons.fvLength - 1);
-        */
-
-        /*
-        //Create Axis
-        this.commons.xAxis = d3.axisBottom(this.commons.scaling)
-            .tickValues(tickArray)
-        //.scale(this.commons.scaling) // TODO
-        //.tickFormat(d3.format("d"));
-        */
 
         //Create Axis
         this.commons.xAxis = d3.axisBottom(this.commons.scaling)
