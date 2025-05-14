@@ -900,7 +900,8 @@ class FeatureViewer {
                     .attr("class", "header-help")
                     .style("display", "inline-block")
 
-                headerHelp
+                // Download button
+                let downloadBtn = headerHelp
                     .append("button")
                     .attr("class", "mybuttoncircle")
                     .attr("id", "downloadButton")
@@ -908,40 +909,49 @@ class FeatureViewer {
                         this.downloadSvg()
                     })
                     // draw icon
-                    .append("svg")
+                    downloadBtn.append("svg")
                     .attr("class", "helperButton")
                     .append("path")
-                    .attr("d", "M13 8v-6h-6v6h-5l8 8 8-8h-5zM0 18h20v2h-20v-2z")
+                    .attr("d", "M13 8v-6h-6v6h-5l8 8 8-8h-5zM0 18h20v2h-20v-2z");
+
+                    downloadBtn.call(this.commons.d3helper.genericTooltipFromString("Download Plot as SVG"));
                 
-                headerHelp
+                // Refresh button
+                let refreshBtn = headerHelp
                     .append("button")
                     .attr("class", "mybuttoncircle")
                     .attr("id", "refreshButton")
                     .on("click", () => {
                         this.resetAll();
-                    })
-                    // draw icon
-                    .append("svg")
-                    .attr("class", "helperButton")
-                    .attr("viewBox", "0 0 512 512")
-                    .append("path")
-                    .attr("d", "M64,256H34A222,222,0,0,1,430,118.15V85h30V190H355V160h67.27A192.21,192.21,0,0,0,256,64C150.13,64,64,150.13,64,256Zm384,0c0,105.87-86.13,192-192,192A192.21,192.21,0,0,1,89.73,352H157V322H52V427H82V393.85A222,222,0,0,0,478,256Z")
-                    .attr("stroke", "dimgray")
-                    .attr("stroke-width", 20)
+                    });
 
-                headerHelp
+                    refreshBtn.append("svg")
+                        .attr("class", "helperButton")
+                        .attr("viewBox", "0 0 512 512")
+                        .append("path")
+                        .attr("d", "M64,256H34A222,222,0,0,1,430,118.15V85h30V190H355V160h67.27A192.21,192.21,0,0,0,256,64C150.13,64,64,150.13,64,256Zm384,0c0,105.87-86.13,192-192,192A192.21,192.21,0,0,1,89.73,352H157V322H52V427H82V393.85A222,222,0,0,0,478,256Z")
+                        .attr("stroke", "dimgray")
+                        .attr("stroke-width", 20);
+
+                refreshBtn.call(this.commons.d3helper.genericTooltipFromString("Reset All Visual Elements"));
+
+                // Help button
+                let helpBtn = headerHelp
                     .append("button")
                     .attr("id", "helpButton")
                     .attr("class", "mybuttoncircle")
                     .on("click", () => {
-                        this.fillSVG.showHelp()
-                    })
-                    // draw icon
-                    .append("svg")
-                    .attr("class", "helperButton")
-                    .append("path")
-                    .attr("d", "M2.93 17.070c-1.884-1.821-3.053-4.37-3.053-7.193 0-5.523 4.477-10 10-10 2.823 0 5.372 1.169 7.19 3.050l0.003 0.003c1.737 1.796 2.807 4.247 2.807 6.947 0 5.523-4.477 10-10 10-2.7 0-5.151-1.070-6.95-2.81l0.003 0.003zM9 11v4h2v-6h-2v2zM9 5v2h2v-2h-2z")
-            }              
+                        this.fillSVG.showHelp();
+                    });
+
+                    helpBtn.append("svg")
+                        .attr("class", "helperButton")
+                        .append("path")
+                        .attr("d", "M2.93 17.070c-1.884-1.821-3.053-4.37-3.053-7.193 0-5.523 4.477-10 10-10 2.823 0 5.372 1.169 7.19 3.050l0.003 0.003c1.737 1.796 2.807 4.247 2.807 6.947 0 5.523-4.477 10-10 10-2.7 0-5.151-1.070-6.95-2.81l0.003 0.003zM9 11v4h2v-6h-2v2zM9 5v2h2v-2h-2z");
+
+                    helpBtn.call(this.commons.d3helper.genericTooltipFromString("Click for Help"));
+                }
+            
         }
 
         this.commons.svg = d3.select(div).append("svg")

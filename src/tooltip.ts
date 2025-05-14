@@ -270,6 +270,7 @@ class Tool extends Calculate {
 
             let tooltipDiv = this.commons.tooltipDiv;
             let bodyNode = d3.select(div).node();
+            let offsest = 10; // Get tooltip out from under cursor
             let message = object.tooltip;
 
             let tooltip = (selection) => {
@@ -281,7 +282,7 @@ class Tool extends Calculate {
 
                     let left, top;
                     left = absoluteMousePos[0].toString();
-                    top = absoluteMousePos[1].toString();
+                    top = absoluteMousePos[1].toString() - offsest;
 
                     if (message) {
                         tooltipDiv.transition()
@@ -317,6 +318,49 @@ class Tool extends Calculate {
 
             return tooltip;
         };
+
+
+        // Tooltips for Helper Buttons in Header
+        this.commons.d3helper.genericTooltipFromString = (tooltipText) => {
+
+            let tooltipDiv = this.commons.tooltipDiv;
+            let bodyNode = d3.select(div).node();
+            let offsest = 10; // Get tooltip out from under cursor
+
+            let tooltip = (selection) => {
+                let absoluteMousePos;
+
+                let drawMyTooltip = () => {
+                    absoluteMousePos = d3.mouse(bodyNode);
+
+                    let left = absoluteMousePos[0].toString();
+                    let top = absoluteMousePos[1].toString() - offsest;
+
+                    if (tooltipText) {
+                        tooltipDiv.transition()
+                            .duration(200)
+                            .style("opacity", 1);
+                        tooltipDiv
+                            .html(tooltipText)
+                            .style("left", left + 'px')
+                            .style("top", top + 'px');
+                    }
+                };
+
+                selection
+                    .on('mouseover', drawMyTooltip)
+                    .on('mousemove', drawMyTooltip)
+                    .on('mouseout', () => {
+                        tooltipDiv.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                    });
+            };
+
+            return tooltip;
+        };
+
+
 
         this.commons.d3helper.tooltip = (object) => {
 
