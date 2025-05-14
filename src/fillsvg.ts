@@ -394,6 +394,42 @@ class FillSVG extends ComputingFunctions {
 
         let scrollableGroup = this.commons.sidebarElements;
 
+        // Only add default header and sequence button if sidebar is currently empty
+        if (scrollableGroup.node().children.length === 0) {
+            const defaultItems = [
+                {
+                    id: 'Header',
+                    label: 'Header',
+                    content: '<span style="font-size: .8125rem; font-family: sans-serif;">Click on Legend Item to Show/Hide</span>'
+                },
+                {
+                    id: 'Sequence_Button',
+                    label: 'Sequence Button',
+                    content: `
+                        <button class="btn" style="background-color: transparent; border: none; padding: 5px 12px; cursor: pointer; outline: none; display: flex; align-items: center;">
+                            <span style="display: inline-block; width: 5px; height: 5px; background-color: black; border-radius: 50%; margin-right: 12px;"></span>
+                            Sequence
+                        </button>`
+                }
+            ];
+
+            for (const item of defaultItems) {
+                scrollableGroup
+                    .append('div')
+                    .attr('id', `default_${item.id}`)
+                    .style('margin-bottom', '0px')
+                    .datum({
+                        label: item.label,
+                        featureId: 'default',
+                        data: null,
+                        type: 'default',
+                        id: item.id
+                    })
+                    .html(item.content);
+            }
+        }
+
+
         // Check if object.sidebar exists before proceeding
         if (object.sidebar) {
             // Check type and add html elements accordingly
