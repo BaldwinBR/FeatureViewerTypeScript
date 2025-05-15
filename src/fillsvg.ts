@@ -308,8 +308,9 @@ class FillSVG extends ComputingFunctions {
 
 
             this.preComputing.preComputingLine(feature);
-
+            this.addLineScale(this.commons.YPosition); 
             this.fillSVGLine(feature, this.commons.YPosition);
+
             feature.data = this.storeData;
             this.commons.YPosition += this.commons.step // feature.pathLevel; // 7
             // this.commons.YPosition += negativeNumbers ? feature.pathLevel - 5 : 0;
@@ -1059,7 +1060,7 @@ class FillSVG extends ComputingFunctions {
             .attr("id", () => {return 'c' + object.id + '_container'})
             .attr("class", "lining featureLine")
             .attr("transform", "translate(0," + position + ")")
-            .attr("heigth", object.curveHeight);
+            .attr("heigth", object.curveHeight); //Misspelled lol
 
         // Line graphs are made up of segments, 
         // constructed from points of the same color,
@@ -1387,7 +1388,46 @@ class FillSVG extends ComputingFunctions {
         
     }
 
-    // AXIS FUNCTIONS
+    // Verical Axis for Curves
+    private addLineScale(yPosition: number) {
+        // Calculate the axis height based on shared scaling logic
+        // Note: This needs to be manually updated if line scaling changes
+        const axisHeight = (this.commons.step / 11) * 22;
+
+        // Define Y scale and axis with fixed tick values
+        const yScale = d3.scaleLinear()
+            .domain([0, 1])
+            .range([axisHeight, 0]);
+
+        const yAxis = d3.axisLeft(yScale)
+            .tickValues([0, 0.5, 1])
+            .tickSize(4);
+
+        // Remove any existing axis at this position to prevent duplication
+        this.commons.lineScaleSVG
+            .selectAll(`.y-axis-line[y-pos="${yPosition}"]`)
+            .remove();
+
+        // Append a new axis group at the specified vertical position
+        const yAxisGroup = this.commons.lineScaleSVG.append("g")
+            .attr("class", "y-axis-line")
+            .attr("y-pos", yPosition) // Custom attribute for identification
+            .attr("transform", `translate(150, ${yPosition + 0.5})`) // Slight 0.5 offset for pixel alignment
+            .call(yAxis);
+
+        // Style the axis text
+        yAxisGroup.selectAll("text")
+            .style("font-size", "8px")
+            .style("fill", "#000");
+
+        // Style the axis lines
+        yAxisGroup.selectAll("path, line")
+            .style("stroke", "#000")
+            .style("stroke-width", "1");
+        }
+
+
+    // X AXIS FUNCTIONS
     public reset_axis() {
         if (this.commons.animation) {
             this.commons.svgContainer.transition().duration(500);

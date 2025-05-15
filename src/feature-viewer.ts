@@ -183,6 +183,13 @@ class FeatureViewer {
 
     };
 
+    private addLineScaleContainer() {
+    // This should be called once in your viewer setup
+    this.commons.lineScaleSVG = this.commons.svg.append("g")
+        .attr("class", "y-axis-lines")
+        .attr("transform", `translate(0, 0)`);
+}
+
     private updateYAxis() {
         // create g
         this.commons.yAxisSVGGroup = this.commons.yAxisSVG
@@ -1073,6 +1080,7 @@ class FeatureViewer {
         this.fillSVG.addXAxis(this.commons.YPosition);
         this.fillSVG.addXAxisTop(this.commons.YPosition);
         this.addYAxis();
+        this.addLineScaleContainer();
 
         if (this.commons.viewerOptions.brushActive) {
             // this.commons.viewerOptions.brushActive = true;

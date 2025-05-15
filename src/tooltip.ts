@@ -415,8 +415,6 @@ class Tool extends Calculate {
                          // Which should not be displayed by the tooltip
                          // Checking if the sequence number is valid is a check for this
                          if (elemHover?.x !== undefined && sequence[elemHover.x] !== undefined) {
-                            console.log(elemHover.type)
-                            console.log(elemHover)
                             const title = `<p style="margin:2px;font-weight:700;">${elemHover.title}</p>`;
                             const score = `<p style="margin:2px;">Score: ${elemHover.y.toFixed(3)}</p>`;
                             const position = `<p style="margin:2px;">Position: ${elemHover.x}${sequence[elemHover.x]}</p>`;
