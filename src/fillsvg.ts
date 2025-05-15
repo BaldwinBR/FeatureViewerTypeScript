@@ -95,7 +95,8 @@ class PreComputing {
                     x: d.x ,
                     y: yValue,
                     id: d.id,
-                    description: d.label || '',
+                    title: d.title || '',
+                    type: d.type || '',
                     tooltip: d.tooltip || '',
                     color: d.color || '' //preserve color value of segment
                 }
@@ -1038,9 +1039,10 @@ class FillSVG extends ComputingFunctions {
         interface Point {
             x: number;
             y: number;
-            description: string;
+            title: string;
+            type: string;
             tooltip: string;
-            color: string; // preserve color data in point for tooltips
+            color: string;
         }
 
         interface Segment {
@@ -1073,7 +1075,8 @@ class FillSVG extends ComputingFunctions {
                 points: [{
                     x: line[0].x,
                     y: line[0].y,
-                    description: line[0].description,
+                    title: line[0].title,
+                    type: line[0].type,
                     tooltip: line[0].tooltip,
                     color: line[0].color
                 }]
@@ -1109,7 +1112,8 @@ class FillSVG extends ComputingFunctions {
                     currentSegment.points.push({
                         x: point.x,
                         y: point.y,
-                        description: point.description,
+                        title: point.title,
+                        type: point.type,
                         tooltip: point.tooltip,
                         color: point.color
                     })
@@ -1124,7 +1128,8 @@ class FillSVG extends ComputingFunctions {
                         points: [{
                             x: point.x,
                             y: point.y,
-                            description: point.description,
+                            title: point.title,
+                            type: point.type,
                             tooltip: point.tooltip,
                             color: point.color
                         }]
