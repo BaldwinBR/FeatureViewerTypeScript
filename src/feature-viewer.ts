@@ -746,7 +746,8 @@ class FeatureViewer {
                 return this.commons.scaling(d['x']);
                 // return this.commons.scaling((d[0] as any).x);
             })
-            .curve(d3.curveBasis);
+            //.curve(d3.curveBasis); // Original Library
+            .curve(d3.curveMonotoneX); // More accurate to data while keeping smoothness
 
         this.commons.lineYScale = d3.scaleLinear()
             .domain([0, -30])

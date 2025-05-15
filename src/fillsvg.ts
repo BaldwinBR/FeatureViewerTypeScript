@@ -46,7 +46,7 @@ class PreComputing {
         const yScores = object.data[0].map(o => o.y);
         const maxScore = Math.max(...yScores);
         const minScore = Math.min(...yScores);
-
+        
         if (!object.height) { object.height = this.commons.step / 2 }
         let shift = parseInt(object.height);
         let level = 0;
