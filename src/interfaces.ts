@@ -104,7 +104,8 @@ export interface FeatureData {
   stroke?: string,
   opacity?: number,
   tooltip?: string,
-  flag?: number;
+  title?: string,
+  type?: string,
 }
 
 export interface SideBarObject {
