@@ -1390,8 +1390,15 @@ class FillSVG extends ComputingFunctions {
 
     // Verical Axis for Curves
     private addLineScale(yPosition: number) {
-        // Calculate the axis height based on shared scaling logic
-        // Note: This needs to be manually updated if line scaling changes
+    
+        // Calculate the axis height according to the current scaling logic.
+        //--------------------------------------------------------------------
+        // IMPORTANT: The scaling logic is inherited directly from the original library.
+        // If the line scaling parameters change, this calculation must be updated manually.
+        // Note that line scaling depends on multiple variables, so adjusting graph size may
+        // require careful tuning or unifying of these factors to maintain consistency.
+        // 
+        // TODO: Unify and refactor the scaling logic for better consistency.
         const axisHeight = (this.commons.step / 11) * 22;
 
         // Define Y scale and axis with fixed tick values
