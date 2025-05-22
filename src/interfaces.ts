@@ -90,8 +90,6 @@ export interface FeatureObject {
   isOpen?: boolean,
   flagLevel?: number,
   subfeatures?: Array<FeatureObject>,
-  customTooltip?: (data: any) => string,
-  flag?: number;
   toggle?: boolean | Array<boolean>;
 }
 
@@ -115,7 +113,6 @@ export interface SideBarObject {
   type?: string,
   width?: number,
   label?: string | number,
-  flag?: number;
 }
 
 export interface FeatureViewerLogger {
